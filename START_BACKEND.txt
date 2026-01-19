@@ -1,0 +1,37 @@
+========================================
+HOW TO START THE BACKEND (CORRECT WAY)
+========================================
+
+IMPORTANT: You MUST activate the virtual environment first!
+
+STEP 1: Open PowerShell (normal, not Admin)
+
+STEP 2: Navigate to backend folder
+cd "C:\Users\mayan\Desktop\career calender\backend"
+
+STEP 3: Activate virtual environment
+.\venv\Scripts\Activate.ps1
+
+You should see (venv) at the beginning of your prompt like:
+(venv) PS C:\Users\mayan\Desktop\career calender\backend>
+
+STEP 4: Now run the backend
+python -m uvicorn main:app --reload
+
+OR use the npm script from project root:
+cd ..
+npm run dev:backend
+
+========================================
+QUICK CHECKLIST
+========================================
+
+✓ Virtual environment activated? (You should see "venv" in prompt)
+✓ Running from backend folder OR using npm script?
+✓ Using: python -m uvicorn (not just "uvicorn")
+
+If you see "No module named uvicorn":
+→ You forgot to activate the virtual environment!
+→ Go back to STEP 3
+
+========================================

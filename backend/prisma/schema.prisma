@@ -1,0 +1,187 @@
+// Prisma schema for CareerPath Planner
+
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Authentication (Google OAuth)
+  googleId        String?   @unique
+  email           String?   // Email from Google account
+  profilePicture  String?   // Profile picture URL from Google
+  
+  // Onboarding data
+  careerStream    String?   // Software Development, Data Science, AI/ML, Product, Finance
+  skills          String[]  // Array of skill tags
+  universityYear  Int?      // 1, 2, 3, 4
+  graduationYear  Int?
+  country         String?
+  targetTiers     Int[]     // [1, 2, 3] - which tiers user is interested in
+  
+  // Calculated fields
+  readinessScore  Float?    @default(0)
+  
+  // Activity tracking
+  lastActiveAt    DateTime?   // Last time user was active
+  
+  // Relations
+  applications    Application[]
+  problemProgress UserProblemProgress[]
+  friends         Friend[]     @relation("UserFriends")
+  followers       Friend[]     @relation("UserFollowers")
+  
+  @@map("users")
+}
+
+model Company {
+  id                String    @id @default(uuid())
+  name              String    @unique
+  tier              Int       // 1, 2, or 3
+  description       String?
+  website           String?
+  logoUrl           String?
+  
+  // Application windows
+  internshipOpenMonth String? // "August", "September", etc.
+  fulltimeOpenMonth   String?
+  
+  // Relations
+  roles            Role[]
+  applications     Application[]
+  internshipPostings InternshipPosting[]
+  
+  @@map("companies")
+}
+
+model Role {
+  id              String    @id @default(uuid())
+  name            String    // "Software Engineer", "Data Scientist", etc.
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  requiredSkills  String[]  // Array of required skills
+  minYear         Int       // Minimum university year (1-4)
+  isInternship    Boolean   @default(true)
+  isFulltime      Boolean   @default(false)
+  
+  description     String?
+  
+  // Relations
+  internshipPostings InternshipPosting[]
+  
+  @@map("roles")
+}
+
+model Application {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId      String
+  company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  roleName        String
+  
+  // Calendar phases
+  preparationStart    DateTime
+  applicationStart    DateTime
+  applicationEnd      DateTime
+  interviewStart      DateTime
+  interviewEnd        DateTime
+  
+  status          String    @default("planned") // planned, applied, interview, rejected, offer
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("applications")
+}
+
+model InternshipPosting {
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  roleId            String?
+  role              Role?     @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  
+  // Role-specific details
+  roleName          String    // "Software Engineer Intern", "Data Scientist Intern", etc.
+  location          String?   // "US", "EMEA", "India", "Remote", etc.
+  term              String?   // "Summer", "Fall", "Winter", "Off-cycle", etc.
+  
+  // Application status
+  applicationStatus String    // "Open", "Closed", "Rolling", "Not Yet Open"
+  
+  // Application window (only if not rolling)
+  applicationStart  DateTime?
+  applicationEnd    DateTime?
+  deadline          String?   // "Rolling — closes when filled" or "No fixed deadline published" or actual date
+  
+  // Verification data
+  isVerified        Boolean   @default(false)
+  lastVerifiedDate  DateTime?
+  sourceUrl         String?   // URL to official posting
+  verificationNotes String?   // Any notes about verification
+  
+  // Metadata
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@unique([companyId, roleName, location, term])
+  @@map("internship_postings")
+}
+
+model Feedback {
+  id          String    @id @default(uuid())
+  message     String    @db.Text
+  rating      Int?      // Optional rating (1-5)
+  userEmail   String?   // Optional user email
+  pageSource  String?   // Page or source where feedback was submitted
+  createdAt   DateTime  @default(now())
+  
+  @@map("feedback")
+}
+
+model UserProblemProgress {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId     Int       // Problem ID from the problems list
+  isBookmarked  Boolean   @default(false)
+  isSolved      Boolean   @default(false)
+  attempts      Int       @default(0)
+  lastAttempted DateTime?
+  solvedAt      DateTime?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@unique([userId, problemId])
+  @@map("user_problem_progress")
+}
+
+model Friend {
+  id          String    @id @default(uuid())
+  userId      String    // User who added the friend
+  friendId    String    // User who was added as friend
+  user        User      @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
+  friend      User      @relation("UserFollowers", fields: [friendId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
+  @@map("friends")
+}
+
+
+
+
+
