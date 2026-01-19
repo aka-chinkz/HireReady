@@ -26,6 +26,7 @@ class UserResponse(BaseModel):
     readiness_score: Optional[float]
     profile_picture: Optional[str]
     email: Optional[str]
+    username: Optional[str]
     last_active_at: Optional[datetime]
     created_at: datetime
     updated_at: datetime

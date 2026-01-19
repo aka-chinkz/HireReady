@@ -17,7 +17,8 @@ model User {
   // Authentication (Google OAuth)
   googleId        String?   @unique
   email           String?   // Email from Google account
-  profilePicture  String?   // Profile picture URL from Google
+  profilePicture  String?   // Profile picture URL from Google or base64 data URL
+  username        String?   @unique // Custom username (3-30 chars, alphanumeric, underscores, hyphens)
   
   // Onboarding data
   careerStream    String?   // Software Development, Data Science, AI/ML, Product, Finance

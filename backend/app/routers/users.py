@@ -35,15 +35,16 @@ async def create_user(user_data: UserCreate):
         
         return UserResponse(
             id=user.id,
-            career_stream=user.career_stream,
+            career_stream=user.careerStream,
             skills=user.skills,
-            university_year=user.university_year,
-            graduation_year=user.graduation_year,
+            university_year=user.universityYear,
+            graduation_year=user.graduationYear,
             country=user.country,
-            target_tiers=user.target_tiers,
-            readiness_score=user.readiness_score,
+            target_tiers=user.targetTiers,
+            readiness_score=user.readinessScore,
             profile_picture=user.profilePicture,
             email=user.email,
+            username=getattr(user, 'username', None),
             last_active_at=user.lastActiveAt,
             created_at=user.createdAt,
             updated_at=user.updatedAt
@@ -75,7 +76,7 @@ async def get_user(user_id: str):
         readiness_score=user.readiness_score,
         profile_picture=user.profilePicture,
         email=user.email,
-        username=username,
+        username=getattr(user, 'username', None),
         last_active_at=user.lastActiveAt,
         created_at=user.createdAt,
         updated_at=user.updatedAt
@@ -111,6 +112,7 @@ async def update_user(user_id: str, user_data: UserCreate):
         readiness_score=updated.readiness_score,
         profile_picture=updated.profilePicture,
         email=updated.email,
+        username=getattr(updated, 'username', None),
         last_active_at=updated.lastActiveAt,
         created_at=updated.createdAt,
         updated_at=updated.updatedAt
@@ -186,10 +188,11 @@ async def update_user_activity(user_id: str):
         
         # Check if lastActiveAt field exists in the model (handle case where migration not run yet)
         try:
-            # Update lastActiveAt
+            # Update lastActiveAt with timezone-aware datetime
+            from datetime import timezone
             await prisma.user.update(
                 where={"id": user_id},
-                data={"lastActiveAt": datetime.now()}
+                data={"lastActiveAt": datetime.now(timezone.utc)}
             )
         except (AttributeError, Exception) as e:
             # If lastActiveAt field doesn't exist yet (migration not run), silently fail
@@ -227,7 +230,16 @@ async def get_user_activity_status(user_id: str):
             
             if last_active:
                 # Consider user online if active within last 5 minutes
-                time_diff = (datetime.now() - last_active).total_seconds()
+                # Handle timezone-aware datetimes from database
+                from datetime import timezone
+                # Make both datetimes timezone-aware for comparison
+                if last_active.tzinfo is None:
+                    # Database returned naive datetime, use naive now
+                    now = datetime.now()
+                else:
+                    # Database returned timezone-aware datetime, use timezone-aware now
+                    now = datetime.now(timezone.utc)
+                time_diff = (now - last_active).total_seconds()
                 is_online = time_diff < 300  # 5 minutes
             
             return ActivityStatusResponse(
@@ -397,13 +409,13 @@ async def update_user_profile(user_id: str, profile_data: ProfileUpdateRequest):
         
         return UserResponse(
             id=updated.id,
-            career_stream=updated.career_stream,
+            career_stream=updated.careerStream,
             skills=updated.skills,
-            university_year=updated.university_year,
-            graduation_year=updated.graduation_year,
+            university_year=updated.universityYear,
+            graduation_year=updated.graduationYear,
             country=updated.country,
-            target_tiers=updated.target_tiers,
-            readiness_score=updated.readiness_score,
+            target_tiers=updated.targetTiers,
+            readiness_score=updated.readinessScore,
             profile_picture=updated.profilePicture,
             email=updated.email,
             username=username,
