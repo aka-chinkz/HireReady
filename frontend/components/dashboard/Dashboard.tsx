@@ -228,7 +228,7 @@ export default function Dashboard({ userId }: DashboardProps) {
               </p>
             </motion.div>
 
-            {/* Card 3: Know When You're Actually Ready */}
+            {/* Card 3: Know When You&apos;re Actually Ready */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
