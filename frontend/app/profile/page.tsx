@@ -24,18 +24,21 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const userId = localStorage.getItem('userId')
+    console.log('🔍 Profile page useEffect - userId from storage:', userId)
     if (!userId) {
       router.push('/')
       return
     }
 
+    // Force reload user data to ensure we have the latest
+    console.log('🔄 Loading user data for userId:', userId)
     loadUser(userId)
     loadProblemStats(userId)
     loadActivityStatus(userId)
     loadGlobalRank(userId)
     // Update activity on mount
     userStatsApi.updateActivity(userId)
-    
+
     // Update activity every 2 minutes while user is on the page
     const activityInterval = setInterval(() => {
       userStatsApi.updateActivity(userId)
@@ -53,14 +56,62 @@ export default function ProfilePage() {
     }
   }, [router])
 
+  // Debug: Log user state changes, especially profile_picture
+  useEffect(() => {
+    const storageUserId = localStorage.getItem('userId')
+    if (user) {
+      console.log('👤 User state updated:', {
+        userId: user.id,
+        storageUserId: storageUserId,
+        userIdsMatch: user.id === storageUserId,
+        email: user.email,
+        username: user.username,
+        hasProfilePicture: !!user.profile_picture,
+        profilePictureValue: user.profile_picture ? user.profile_picture.substring(0, 100) + '...' : 'null/empty',
+        profilePictureLength: user.profile_picture?.length || 0,
+        profilePictureType: user.profile_picture ? (user.profile_picture.startsWith('data:') ? 'base64' : 'url') : 'none'
+      })
+
+      // Warn if user IDs don't match
+      if (user.id !== storageUserId) {
+        console.error('⚠️ WARNING: User ID mismatch! State:', user.id, 'Storage:', storageUserId)
+      }
+    } else {
+      console.log('👤 User state is null')
+    }
+  }, [user])
+
   const loadUser = async (userId: string) => {
     try {
+      console.log('🔍 loadUser called with userId:', userId)
       const userData = await userApi.get(userId)
+      console.log('✅ Loaded user data from API:', {
+        id: userData.id,
+        email: userData.email,
+        username: userData.username,
+        hasProfilePicture: !!userData.profile_picture,
+        profilePictureValue: userData.profile_picture ? userData.profile_picture.substring(0, 100) + '...' : 'null/empty',
+        profilePictureLength: userData.profile_picture?.length || 0,
+        profilePictureType: userData.profile_picture ? (userData.profile_picture.startsWith('data:') ? 'base64' : 'url') : 'none',
+        profilePictureStartsWith: userData.profile_picture ? userData.profile_picture.substring(0, 20) : 'N/A',
+        fullUserData: JSON.stringify(userData, null, 2)
+      })
+
+      // Force a state update with the exact data received
       setUser(userData)
+
+      // Double-check the state was set correctly
+      setTimeout(() => {
+        console.log('🔍 State check after setUser:', {
+          userInState: !!user,
+          profilePictureInState: user?.profile_picture ? user.profile_picture.substring(0, 50) + '...' : 'null'
+        })
+      }, 100)
+
       // Load friend counts
       loadFriendCounts(userId)
     } catch (error) {
-      console.error('Error loading user:', error)
+      console.error('❌ Error loading user:', error)
     } finally {
       setLoading(false)
     }
@@ -124,9 +175,24 @@ export default function ProfilePage() {
   }
 
   const getProfilePicture = (): string => {
-    if (user?.profile_picture) {
-      return user.profile_picture
+    const profilePic = user?.profile_picture
+    console.log('getProfilePicture called:', {
+      hasUser: !!user,
+      userId: user?.id,
+      hasProfilePicture: !!profilePic,
+      profilePictureValue: profilePic ? profilePic.substring(0, 50) + '...' : 'null/empty',
+      profilePictureType: profilePic ? (profilePic.startsWith('data:') ? 'base64' : 'url') : 'none',
+      profilePictureLength: profilePic?.length || 0,
+      fullUserObject: user
+    })
+
+    // Check if profile picture exists and is not empty string
+    if (profilePic && profilePic.trim().length > 0) {
+      // Return the profile picture directly (same as ranking page does)
+      console.log('Returning profile picture directly')
+      return profilePic
     }
+    console.log('Returning default avatar (no profile picture)')
     return getDefaultAvatar(user?.email || null)
   }
 
@@ -141,10 +207,43 @@ export default function ProfilePage() {
 
   const handleSaveProfile = async (data: { profile_picture?: string; username?: string }) => {
     if (!user) return
-    
+
+    const currentUserId = localStorage.getItem('userId')
+    console.log('handleSaveProfile called:', {
+      currentUserIdFromStorage: currentUserId,
+      userStateId: user.id,
+      userIdsMatch: currentUserId === user.id,
+      hasProfilePicture: !!data.profile_picture,
+      profilePictureLength: data.profile_picture?.length || 0,
+      profilePicturePreview: data.profile_picture?.substring(0, 50) || 'None',
+      username: data.username
+    })
+
+    // Ensure we're using the correct user ID
+    const userIdToUpdate = user.id
+    if (currentUserId !== userIdToUpdate) {
+      console.error('WARNING: User ID mismatch! Storage:', currentUserId, 'State:', userIdToUpdate)
+    }
+
     try {
-      const updatedUser = await userApi.updateProfile(user.id, data)
+      const updatedUser = await userApi.updateProfile(userIdToUpdate, data)
+      console.log('Profile updated, received user:', {
+        id: updatedUser.id,
+        hasProfilePicture: !!updatedUser.profile_picture,
+        profilePictureLength: updatedUser.profile_picture?.length || 0,
+        profilePicturePreview: updatedUser.profile_picture?.substring(0, 50) || 'None'
+      })
+      // Set the updated user immediately
       setUser(updatedUser)
+      // Reload user data to ensure we have the latest from server (this might overwrite, but ensures consistency)
+      const reloadedUser = await userApi.get(user.id)
+      console.log('Reloaded user after save:', {
+        id: reloadedUser.id,
+        hasProfilePicture: !!reloadedUser.profile_picture,
+        profilePictureLength: reloadedUser.profile_picture?.length || 0,
+        profilePicturePreview: reloadedUser.profile_picture?.substring(0, 50) || 'None'
+      })
+      setUser(reloadedUser)
       // Reload friend counts and stats
       await loadFriendCounts(user.id)
       loadProblemStats(user.id)
@@ -209,25 +308,21 @@ export default function ProfilePage() {
               Logout
             </button>
           </div>
-          
+
           <div className="flex items-center gap-6 mb-8">
             <div className="relative group">
-              <img
-                src={getProfilePicture()}
-                alt="Profile"
-                className="w-24 h-24 rounded-full border-4 border-violet-500/50 object-cover shadow-lg"
-                onError={(e) => {
-                  // Fallback to gradient icon if image fails to load
-                  const target = e.target as HTMLImageElement
-                  target.style.display = 'none'
-                  if (target.nextElementSibling) {
-                    (target.nextElementSibling as HTMLElement).style.display = 'flex'
-                  }
-                }}
-              />
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center border-4 border-violet-500/50 shadow-lg hidden">
-                <UserIcon className="w-12 h-12 text-white" />
-              </div>
+              {user?.profile_picture && user.profile_picture.trim().length > 0 ? (
+                <img
+                  key={`profile-img-${user.id}-${user.profile_picture.substring(0, 10)}`}
+                  src={user.profile_picture}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full border-4 border-violet-500/50 object-cover shadow-lg"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center border-4 border-violet-500/50 shadow-lg">
+                  <UserIcon className="w-12 h-12 text-white" />
+                </div>
+              )}
               <button
                 onClick={() => setIsEditModalOpen(true)}
                 className="absolute bottom-0 right-0 p-2 bg-violet-500 rounded-full border-4 border-slate-900 hover:bg-violet-600 transition-colors opacity-0 group-hover:opacity-100"

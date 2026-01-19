@@ -65,22 +65,45 @@ async def get_user(user_id: str):
     except AttributeError:
         username = None
     
-    return UserResponse(
+    # Debug logging for profile picture
+    profile_pic = user.profilePicture
+    print(f"========== DEBUG get_user ==========")
+    print(f"User ID: {user_id}")
+    print(f"Email: {user.email}")
+    print(f"Profile picture exists: {profile_pic is not None}")
+    print(f"Profile picture type: {type(profile_pic)}")
+    if profile_pic:
+        print(f"Profile picture length: {len(profile_pic)}")
+        print(f"First 100 chars: {profile_pic[:100]}...")
+        print(f"Starts with 'data:': {profile_pic.startswith('data:')}")
+    else:
+        print(f"Profile picture is None or empty")
+    print(f"====================================")
+    
+    # Build response explicitly
+    response = UserResponse(
         id=user.id,
-        career_stream=user.career_stream,
+        career_stream=user.careerStream,
         skills=user.skills,
-        university_year=user.university_year,
-        graduation_year=user.graduation_year,
+        university_year=user.universityYear,
+        graduation_year=user.graduationYear,
         country=user.country,
-        target_tiers=user.target_tiers,
-        readiness_score=user.readiness_score,
-        profile_picture=user.profilePicture,
+        target_tiers=user.targetTiers,
+        readiness_score=user.readinessScore,
+        profile_picture=profile_pic,  # Explicitly set profile picture
         email=user.email,
         username=getattr(user, 'username', None),
         last_active_at=user.lastActiveAt,
         created_at=user.createdAt,
         updated_at=user.updatedAt
     )
+    
+    # Verify response has profile picture
+    print(f"Response profile_picture exists: {response.profile_picture is not None}")
+    if response.profile_picture:
+        print(f"Response profile_picture length: {len(response.profile_picture)}")
+    
+    return response
 
 @router.put("/{user_id}", response_model=UserResponse)
 async def update_user(user_id: str, user_data: UserCreate):
@@ -103,13 +126,13 @@ async def update_user(user_id: str, user_data: UserCreate):
     
     return UserResponse(
         id=updated.id,
-        career_stream=updated.career_stream,
+        career_stream=updated.careerStream,
         skills=updated.skills,
-        university_year=updated.university_year,
-        graduation_year=updated.graduation_year,
+        university_year=updated.universityYear,
+        graduation_year=updated.graduationYear,
         country=updated.country,
-        target_tiers=updated.target_tiers,
-        readiness_score=updated.readiness_score,
+        target_tiers=updated.targetTiers,
+        readiness_score=updated.readinessScore,
         profile_picture=updated.profilePicture,
         email=updated.email,
         username=getattr(updated, 'username', None),
@@ -275,17 +298,35 @@ async def update_user_profile(user_id: str, profile_data: ProfileUpdateRequest):
     Validates username uniqueness and format
     """
     try:
+        # Log which user is being updated
+        print(f"DEBUG: update_user_profile called for user_id: {user_id}")
+        print(f"DEBUG: Profile update data - has_picture: {profile_data.profile_picture is not None}, has_username: {profile_data.username is not None}")
+        
         # Check if user exists
         user = await prisma.user.find_unique(where={"id": user_id})
         if not user:
+            print(f"ERROR: User {user_id} not found in database")
             raise HTTPException(status_code=404, detail="User not found")
+        
+        print(f"DEBUG: Found user - id: {user.id}, email: {user.email}, current_profile_picture: {user.profilePicture is not None}")
         
         # Build update data
         update_data = {}
         
         # Validate and update profile picture
         if profile_data.profile_picture is not None:
-            update_data["profilePicture"] = profile_data.profile_picture
+            # Log the profile picture data for debugging
+            profile_pic = profile_data.profile_picture
+            print(f"DEBUG: Updating profile picture. Length: {len(profile_pic) if profile_pic else 0}, Type: {type(profile_pic)}")
+            print(f"DEBUG: First 100 chars: {profile_pic[:100] if profile_pic else 'None'}...")
+            
+            # Handle empty string - treat as removing profile picture
+            if profile_pic and profile_pic.strip():
+                update_data["profilePicture"] = profile_pic
+            else:
+                # Empty string means remove profile picture
+                update_data["profilePicture"] = None
+                print(f"DEBUG: Profile picture is empty, setting to None")
         
         # Validate and update username (only if provided)
         # Note: We'll try to update username, but catch database errors if column doesn't exist
@@ -334,10 +375,18 @@ async def update_user_profile(user_id: str, profile_data: ProfileUpdateRequest):
         
         # Update user - handle case where database column doesn't exist yet
         try:
+            print(f"DEBUG: Updating user {user_id} with data: {list(update_data.keys())}")
+            print(f"DEBUG: Current user before update - id: {user.id}, email: {user.email}")
+            if "profilePicture" in update_data:
+                print(f"DEBUG: Profile picture update - old: {user.profilePicture[:50] if user.profilePicture else 'None'}..., new: {update_data['profilePicture'][:50] if update_data['profilePicture'] else 'None'}...")
+            
             updated = await prisma.user.update(
                 where={"id": user_id},
                 data=update_data
             )
+            print(f"DEBUG: Successfully updated user {updated.id}. Profile picture exists: {updated.profilePicture is not None}")
+            if updated.profilePicture:
+                print(f"DEBUG: Updated profile picture length: {len(updated.profilePicture)}, type: {'base64' if updated.profilePicture.startswith('data:') else 'URL'}")
         except Exception as e:
             # Log the error for debugging
             import traceback

@@ -13,7 +13,7 @@ const shouldUseMockApi = (): boolean => {
 // Default to mock API if backend check hasn't passed
 // This prevents timeout errors on first load
 // Set to false when backend is ready and running
-const USE_MOCK_BY_DEFAULT = true
+const USE_MOCK_BY_DEFAULT = false  // Changed to false to always use real API
 
 const api = axios.create({
   baseURL: API_URL,
@@ -129,7 +129,7 @@ export const userApi = {
         throw error // Re-throw to show in UI
       }
     }
-    
+
     // Try real API if mock is disabled
     try {
       const response = await api.post('/api/users/', data)
@@ -142,27 +142,47 @@ export const userApi = {
     }
   },
   get: async (id: string): Promise<User> => {
-    if (shouldUseMockApi() || USE_MOCK_BY_DEFAULT) {
-      return mockApi.mockUserApi.get(id)
-    }
+    console.log('🔍 userApi.get called with id:', id)
+    const storageUserId = localStorage.getItem('userId')
+    console.log('🔍 Storage userId:', storageUserId, 'Requested id:', id, 'Match:', id === storageUserId)
+
+    // Don't use mock API - always try real API first
     try {
       const response = await api.get(`/api/users/${id}`)
+      console.log('✅ userApi.get response received:', {
+        userId: response.data.id,
+        email: response.data.email,
+        username: response.data.username,
+        hasProfilePicture: !!response.data.profile_picture,
+        profilePictureLength: response.data.profile_picture?.length || 0,
+        profilePicturePreview: response.data.profile_picture ? response.data.profile_picture.substring(0, 50) + '...' : 'None',
+        profilePictureType: response.data.profile_picture ? (response.data.profile_picture.startsWith('data:') ? 'base64' : 'url') : 'none',
+        fullResponse: response.data
+      })
+
+      // Verify the response has the expected structure
+      if (!response.data.profile_picture && response.data.id === id) {
+        console.warn('⚠️ WARNING: Profile picture is missing in API response for user:', id)
+      }
+
       return response.data
     } catch (error: any) {
-      localStorage.setItem('useMockApi', 'true')
-      return mockApi.mockUserApi.get(id)
+      console.error('❌ Error in userApi.get:', error)
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      })
+      // Only fall back to mock if it's a connection error
+      if (error.code === 'ECONNREFUSED' || error.message?.includes('Network Error')) {
+        console.warn('Backend not available, using mock API')
+        localStorage.setItem('useMockApi', 'true')
+        return mockApi.mockUserApi.get(id)
+      }
+      throw error
     }
   },
 
-  updateProfile: async (id: string, data: { profile_picture?: string; email?: string }): Promise<User> => {
-    try {
-      const response = await api.patch(`/api/users/${id}/profile`, data)
-      return response.data
-    } catch (error: any) {
-      localStorage.setItem('useMockApi', 'true')
-      return mockApi.mockUserApi.get(id)
-    }
-  },
   update: async (id: string, data: UserCreate): Promise<User> => {
     if (shouldUseMockApi() || USE_MOCK_BY_DEFAULT) {
       return mockApi.mockUserApi.update(id, data)
@@ -177,8 +197,29 @@ export const userApi = {
   },
 
   updateProfile: async (id: string, data: { profile_picture?: string; username?: string }): Promise<User> => {
+    const storageUserId = localStorage.getItem('userId')
+    console.log('updateProfile called:', {
+      requestedUserId: id,
+      storageUserId: storageUserId,
+      userIdsMatch: id === storageUserId,
+      hasProfilePicture: !!data.profile_picture,
+      hasUsername: !!data.username,
+      profilePictureLength: data.profile_picture?.length || 0,
+      profilePicturePreview: data.profile_picture?.substring(0, 50) || 'None'
+    })
+
+    if (id !== storageUserId) {
+      console.warn('WARNING: User ID mismatch! Requested:', id, 'Storage:', storageUserId)
+    }
+
     try {
       const response = await api.patch(`/api/users/${id}/profile`, data)
+      console.log('updateProfile response:', {
+        userId: response.data.id,
+        hasProfilePicture: !!response.data.profile_picture,
+        profilePictureLength: response.data.profile_picture?.length || 0,
+        profilePicturePreview: response.data.profile_picture?.substring(0, 50) || 'None'
+      })
       return response.data
     } catch (error: any) {
       console.error('Error updating profile:', error)
@@ -352,7 +393,7 @@ export const practiceApi = {
       return []
     }
   },
-  
+
   updateProgress: async (userId: string, problemId: number, data: ProblemProgressUpdate): Promise<ProblemProgress> => {
     try {
       const response = await api.patch(`/api/practice/user/${userId}/progress/${problemId}`, data)
@@ -362,7 +403,7 @@ export const practiceApi = {
       throw error
     }
   },
-  
+
   createOrUpdateProgress: async (userId: string, data: ProblemProgressCreate): Promise<ProblemProgress> => {
     try {
       const response = await api.post(`/api/practice/user/${userId}/progress`, data)
@@ -372,7 +413,7 @@ export const practiceApi = {
       throw error
     }
   },
-  
+
   deleteProgress: async (userId: string, problemId: number): Promise<void> => {
     try {
       await api.delete(`/api/practice/user/${userId}/progress/${problemId}`)
@@ -381,7 +422,7 @@ export const practiceApi = {
       throw error
     }
   },
-  
+
   backfillSolvedDates: async (userId: string): Promise<{ message: string; updated_count: number }> => {
     try {
       const response = await api.post(`/api/practice/user/${userId}/backfill-solved-dates`)

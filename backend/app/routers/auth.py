@@ -180,11 +180,33 @@ async def google_login(request: GoogleTokenRequest):
                 raise
         else:
             # Update email and profile picture if they changed
+            # IMPORTANT: Only update profile picture if user doesn't have a custom one
+            # (i.e., if current profile picture is from Google or empty)
             update_data = {}
             if email and user.email != email:
                 update_data["email"] = email
-            if picture and user.profilePicture != picture:
+            
+            # Only update profile picture if:
+            # 1. User doesn't have a profile picture (None or empty)
+            # 2. OR current profile picture is from Google (starts with https://lh3.googleusercontent.com)
+            # This preserves custom uploaded images (base64 data URLs)
+            current_pic = user.profilePicture
+            should_update_picture = False
+            if picture:
+                if not current_pic or current_pic.strip() == '':
+                    # No existing picture - use Google's
+                    should_update_picture = True
+                elif current_pic.startswith('https://lh3.googleusercontent.com') or current_pic.startswith('https://www.googleapis.com'):
+                    # Current picture is from Google - can update with new Google picture
+                    if current_pic != picture:
+                        should_update_picture = True
+                # If current picture is a base64 data URL (starts with 'data:'), don't overwrite it
+            
+            if should_update_picture:
                 update_data["profilePicture"] = picture
+                print(f"DEBUG: Updating profile picture from Google for user {user.id}")
+            else:
+                print(f"DEBUG: Preserving custom profile picture for user {user.id}")
             
             if update_data:
                 try:
