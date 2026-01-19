@@ -41,7 +41,7 @@ The easiest way is to use a free cloud PostgreSQL database. Here are free option
 1. **Add to backend/.env:**
    ```
    DATABASE_URL="your-connection-string-here"
-   GOOGLE_CLIENT_ID=1093221971662-321cmip64r5bjlvh42hhjtmog1pprkv9.apps.googleusercontent.com
+   GOOGLE_CLIENT_ID=239752066498-5n66f47qhr0c9kii5seof03k50b4qh5j.apps.googleusercontent.com
    ```
 
 2. **Run migrations:**
