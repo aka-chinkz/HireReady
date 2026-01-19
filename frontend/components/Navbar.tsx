@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
@@ -9,6 +9,32 @@ export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    // Check if user is logged in
+    const checkLoginStatus = () => {
+      const userId = localStorage.getItem('userId')
+      setIsLoggedIn(!!userId)
+    }
+    
+    // Check on mount and when pathname changes (after login redirect)
+    checkLoginStatus()
+    
+    // Listen for storage changes (when user logs in/out in another tab)
+    window.addEventListener('storage', checkLoginStatus)
+    
+    // Also listen for custom events (when user logs in/out in same tab)
+    const handleLogin = () => checkLoginStatus()
+    window.addEventListener('userLoggedIn', handleLogin)
+    window.addEventListener('userLoggedOut', handleLogin)
+    
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus)
+      window.removeEventListener('userLoggedIn', handleLogin)
+      window.removeEventListener('userLoggedOut', handleLogin)
+    }
+  }, [pathname]) // Re-check when pathname changes (after login)
 
   const navLinks = [
     { path: '/', label: 'Home' },
@@ -28,6 +54,11 @@ export default function Navbar() {
   const handleNavClick = (path: string) => {
     router.push(path)
     setMobileMenuOpen(false)
+  }
+
+  // Don't show navbar if user is not logged in
+  if (!isLoggedIn) {
+    return null
   }
 
   return (
