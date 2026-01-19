@@ -52,7 +52,7 @@ export default function Step4TargetTiers({ value, onChange, onComplete, onBack, 
       <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
         Target Company Tiers
       </h2>
-      <p className="text-slate-400 mb-8">Select which company tiers you're interested in</p>
+      <p className="text-slate-400 mb-8">Select which company tiers you&apos;re interested in</p>
 
       <div className="space-y-4 mb-8">
         {TIERS.map((tier) => {

@@ -187,7 +187,7 @@ export default function EditProfileModal({
       
       // Check if profile picture changed
       if (profilePicture !== user.profile_picture) {
-        updateData.profile_picture = profilePicture || null
+        updateData.profile_picture = profilePicture || undefined
       }
 
       if (Object.keys(updateData).length === 0) {

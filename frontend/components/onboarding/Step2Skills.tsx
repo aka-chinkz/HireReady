@@ -45,7 +45,7 @@ export default function Step2Skills({ value, onChange, onNext, onBack }: Step2Sk
       <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
         Your Skills
       </h2>
-      <p className="text-slate-400 mb-8">Add your technical skills. We'll match them with job requirements.</p>
+      <p className="text-slate-400 mb-8">Add your technical skills. We&apos;ll match them with job requirements.</p>
 
       {/* Input */}
       <div className="mb-6">

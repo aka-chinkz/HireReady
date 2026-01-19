@@ -14,13 +14,17 @@ export interface UserCreate {
 
 export interface User {
   id: string
-  career_stream: string
+  career_stream: string | null
   skills: string[]
-  university_year: number
-  graduation_year: number
-  country: string
+  university_year: number | null
+  graduation_year: number | null
+  country: string | null
   target_tiers: number[]
   readiness_score: number | null
+  profile_picture: string | null
+  email: string | null
+  username: string | null
+  last_active_at: string | null
   created_at: string
   updated_at: string
 }
@@ -232,13 +236,17 @@ export const mockUserApi = {
     
     const user: User = {
       id: `user-${Date.now()}`,
-      career_stream: data.career_stream,
+      career_stream: data.career_stream || null,
       skills: data.skills,
-      university_year: data.university_year,
-      graduation_year: data.graduation_year,
-      country: data.country,
+      university_year: data.university_year || null,
+      graduation_year: data.graduation_year || null,
+      country: data.country || null,
       target_tiers: data.target_tiers,
       readiness_score: 65.5,
+      profile_picture: null,
+      email: null,
+      username: null,
+      last_active_at: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
@@ -261,7 +269,15 @@ export const mockUserApi = {
     const user: User = {
       id,
       ...data,
+      career_stream: data.career_stream || null,
+      university_year: data.university_year || null,
+      graduation_year: data.graduation_year || null,
+      country: data.country || null,
       readiness_score: 65.5,
+      profile_picture: null,
+      email: null,
+      username: null,
+      last_active_at: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
@@ -493,6 +509,7 @@ export const mockIntelligenceApi = {
     
     // Filter roles by year
     const filteredRoles = allRoles.filter(role => {
+      if (user.university_year == null) return false
       if (user.university_year >= role.min_year) return true
       if (role.is_internship && user.university_year >= role.min_year - 1) return true
       return false
@@ -504,7 +521,7 @@ export const mockIntelligenceApi = {
       const score = calculateReadinessScore(
         user.skills,
         role.required_skills,
-        user.university_year,
+        user.university_year ?? 1,
         role.min_year
       )
       scores.push(score)

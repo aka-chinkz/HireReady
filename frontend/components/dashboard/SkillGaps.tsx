@@ -37,7 +37,7 @@ export default function SkillGaps({ gaps, recommendations }: SkillGapsProps) {
           <h2 className="text-xl font-bold">Skill Gaps</h2>
         </div>
         {gaps.length === 0 ? (
-          <p className="text-slate-400 text-sm">No skill gaps identified! You're well-prepared.</p>
+          <p className="text-slate-400 text-sm">No skill gaps identified! You&apos;re well-prepared.</p>
         ) : (
           <div className="space-y-2 max-h-[300px] overflow-y-auto">
             {gaps.slice(0, 5).map((gap, index) => (

@@ -28,7 +28,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     // If backend is not available, automatically switch to mock API
-    if ((error.code === 'ECONNREFUSED' || error.message?.includes('Network Error') || error.code === 'ERR_NETWORK') && !USE_MOCK_API) {
+    if ((error.code === 'ECONNREFUSED' || error.message?.includes('Network Error') || error.code === 'ERR_NETWORK') && !shouldUseMockApi()) {
       console.warn('Backend not available, switching to mock API')
       if (typeof window !== 'undefined') {
         localStorage.setItem('useMockApi', 'true')

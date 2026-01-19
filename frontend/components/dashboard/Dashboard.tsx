@@ -206,7 +206,7 @@ export default function Dashboard({ userId }: DashboardProps) {
                 🎯 Preparation That Matches Real Companies
               </h3>
               <p className="text-slate-300 leading-relaxed">
-                HireReady doesn't give you random questions. Your preparation is aligned with what top software companies actually ask, based on role, level, and interview patterns.
+                HireReady doesn&apos;t give you random questions. Your preparation is aligned with what top software companies actually ask, based on role, level, and interview patterns.
               </p>
             </motion.div>
 
@@ -239,10 +239,10 @@ export default function Dashboard({ userId }: DashboardProps) {
                 <TrendingUp className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">
-                📈 Know When You're Actually Ready
+                📈 Know When You&apos;re Actually Ready
               </h3>
               <p className="text-slate-300 leading-relaxed mb-4">
-                Practice alone doesn't mean readiness. HireReady tracks accuracy, speed, consistency, and topic mastery to tell you how close you are to interview-ready.
+                Practice alone doesn&apos;t mean readiness. HireReady tracks accuracy, speed, consistency, and topic mastery to tell you how close you are to interview-ready.
               </p>
               <div className="mt-6 p-4 bg-gradient-to-r from-violet-500/20 to-cyan-500/20 rounded-xl border border-violet-500/30">
                 <p className="text-slate-200 font-medium">
@@ -283,7 +283,7 @@ export default function Dashboard({ userId }: DashboardProps) {
                 🚀 The HireReady Promise
               </h3>
               <p className="text-slate-300 leading-relaxed mb-4">
-                We don't just help you practice. We help you get hired.
+                We don&apos;t just help you practice. We help you get hired.
               </p>
               <button
                 onClick={() => router.push('/practice')}

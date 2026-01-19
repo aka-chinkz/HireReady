@@ -184,7 +184,7 @@ export default function ProfilePage() {
 
   const handleSaveProfile = async (data: { profile_picture?: string; username?: string }) => {
     if (!user) return
-
+    
     const currentUserId = localStorage.getItem('userId')
     console.log('handleSaveProfile called:', {
       currentUserIdFromStorage: currentUserId,
@@ -285,20 +285,20 @@ export default function ProfilePage() {
               Logout
             </button>
           </div>
-
+          
           <div className="flex items-center gap-6 mb-8">
             <div className="relative group">
               {user?.profile_picture && user.profile_picture.trim().length > 0 ? (
-                <img
+              <img
                   key={`profile-img-${user.id}-${user.profile_picture.substring(0, 10)}`}
                   src={user.profile_picture}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full border-4 border-violet-500/50 object-cover shadow-lg"
+                alt="Profile"
+                className="w-24 h-24 rounded-full border-4 border-violet-500/50 object-cover shadow-lg"
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center border-4 border-violet-500/50 shadow-lg">
-                  <UserIcon className="w-12 h-12 text-white" />
-                </div>
+                <UserIcon className="w-12 h-12 text-white" />
+              </div>
               )}
               <button
                 onClick={() => setIsEditModalOpen(true)}

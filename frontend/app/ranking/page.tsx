@@ -365,7 +365,7 @@ export default function RankingPage() {
           </div>
           {searchQuery && (
             <p className="mt-2 text-xs md:text-sm text-slate-400">
-              Found {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'} matching "{searchQuery}"
+              Found {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'} matching &quot;{searchQuery}&quot;
             </p>
           )}
         </motion.div>

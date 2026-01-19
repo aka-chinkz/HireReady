@@ -67,7 +67,7 @@ export default function ProgressPage() {
         loadProgress(userId)
       }
     }
-    
+
     const handleFocus = () => {
       if (userId) {
         loadProgress(userId)
@@ -76,7 +76,7 @@ export default function ProgressPage() {
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('focus', handleFocus)
-    
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleFocus)
@@ -87,7 +87,7 @@ export default function ProgressPage() {
     try {
       setLoading(true)
       const progressData = await practiceApi.getProgress(userId)
-      
+
       // Check if we have solved problems without solved_at dates
       const solvedWithoutDate = progressData.filter(p => p.is_solved && !p.solved_at)
       if (solvedWithoutDate.length > 0) {
@@ -116,50 +116,51 @@ export default function ProgressPage() {
   const solvedQuestions = useMemo<SolvedQuestion[]>(() => {
     // Include all solved problems, prioritize solved_at, then updated_at, then created_at
     const solvedProgress = progress.filter(p => p.is_solved)
-    
-    return solvedProgress
-      .map(p => {
-        const problem = problems.find(prob => prob.id === p.problem_id)
-        if (!problem) return null
 
-        // Use solved_at first - this is the most accurate date
-        // For problems without solved_at (marked before timestamp logic was added),
-        // use updated_at as fallback, but only if it's recent (within heatmap range)
-        // Otherwise use created_at as last resort
-        let solvedAtDate = p.solved_at
-        
-        if (!solvedAtDate) {
-          // Fallback to updated_at or created_at for legacy data
-          const fallbackDate = p.updated_at || p.created_at
-          if (fallbackDate) {
-            // Use fallback date if it exists
-            solvedAtDate = fallbackDate
-          } else {
-            // Last resort: use today (shouldn't happen, but handle it)
-            solvedAtDate = new Date().toISOString()
-          }
-        }
+    const questions: SolvedQuestion[] = []
 
-        return {
-          id: problem.id,
-          title: problem.title,
-          difficulty: problem.difficulty,
-          topic: problem.topics[0] || 'Other',
-          solved: true,
-          solvedAt: solvedAtDate,
-          platform: problem.platform,
-          link: problem.url,
+    for (const p of solvedProgress) {
+      const problem = problems.find(prob => prob.id === p.problem_id)
+      if (!problem) continue
+
+      // Use solved_at first - this is the most accurate date
+      // For problems without solved_at (marked before timestamp logic was added),
+      // use updated_at as fallback, but only if it's recent (within heatmap range)
+      // Otherwise use created_at as last resort
+      let solvedAtDate = p.solved_at
+
+      if (!solvedAtDate) {
+        // Fallback to updated_at or created_at for legacy data
+        const fallbackDate = p.updated_at || p.created_at
+        if (fallbackDate) {
+          // Use fallback date if it exists
+          solvedAtDate = fallbackDate
+        } else {
+          // Last resort: use today (shouldn't happen, but handle it)
+          solvedAtDate = new Date().toISOString()
         }
+      }
+
+      questions.push({
+        id: problem.id,
+        title: problem.title,
+        difficulty: problem.difficulty,
+        topic: problem.topics[0] || 'Other',
+        solved: true,
+        solvedAt: solvedAtDate,
+        platform: problem.platform,
+        link: problem.url,
       })
-      .filter((q): q is SolvedQuestion => q !== null)
-      .sort((a, b) => new Date(b.solvedAt).getTime() - new Date(a.solvedAt).getTime())
+    }
+
+    return questions.sort((a, b) => new Date(b.solvedAt).getTime() - new Date(a.solvedAt).getTime())
   }, [progress])
 
   // Log solvedQuestions array for debugging
   useEffect(() => {
     if (solvedQuestions.length > 0) {
       console.log('📋 SOLVED QUESTIONS ARRAY:', solvedQuestions.length, 'items')
-      
+
       // Show recent items with normalized date keys
       const recentWithDates = solvedQuestions.slice(0, 10).map(q => {
         const parsedDate = parseISO(q.solvedAt) || new Date(q.solvedAt)
@@ -174,11 +175,11 @@ export default function ProgressPage() {
           solvedAt: q.solvedAt,
           dateKey: dateKey,
           parsedISO: parsedDate.toISOString(),
-          localDate: `${localYear}-${localMonth+1}-${localDay}`
+          localDate: `${localYear}-${localMonth + 1}-${localDay}`
         }
       })
       console.table(recentWithDates)
-      
+
       // Check which dates have solves
       const dateCounts = new Map<string, number>()
       solvedQuestions.forEach(q => {
@@ -189,10 +190,10 @@ export default function ProgressPage() {
           const day = parsedDate.getDate()
           const dateKey = format(new Date(year, month, day), 'yyyy-MM-dd')
           dateCounts.set(dateKey, (dateCounts.get(dateKey) || 0) + 1)
-        } catch (e) {}
+        } catch (e) { }
       })
       console.log('📋 DATE COUNTS (from solvedQuestions):', Array.from(dateCounts.entries()).sort().slice(-10))
-      
+
       if (solvedQuestions.length > 10) {
         console.log(`... and ${solvedQuestions.length - 10} more items`)
       }
@@ -400,11 +401,10 @@ export default function ProgressPage() {
                       <div className="flex items-center gap-3 mb-2">
                         <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
                         <h3 className="text-lg font-semibold text-white">{question.title}</h3>
-                        <span className={`px-2 py-1 rounded text-xs font-semibold border ${
-                          question.difficulty === 'Easy' ? 'bg-green-500/20 border-green-500/50 text-green-400' :
-                          question.difficulty === 'Medium' ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400' :
-                          'bg-red-500/20 border-red-500/50 text-red-400'
-                        }`}>
+                        <span className={`px-2 py-1 rounded text-xs font-semibold border ${question.difficulty === 'Easy' ? 'bg-green-500/20 border-green-500/50 text-green-400' :
+                            question.difficulty === 'Medium' ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400' :
+                              'bg-red-500/20 border-red-500/50 text-red-400'
+                          }`}>
                           {question.difficulty}
                         </span>
                         <span className="px-2 py-1 bg-violet-500/20 border border-violet-500/30 rounded text-xs text-violet-300">
@@ -430,7 +430,7 @@ export default function ProgressPage() {
             </div>
           ) : (
             <div className="text-center py-12 text-slate-400">
-              {searchQuery || difficultyFilter !== 'All' 
+              {searchQuery || difficultyFilter !== 'All'
                 ? 'No questions match your filters'
                 : 'No solved questions yet. Start solving problems to track your progress!'}
             </div>

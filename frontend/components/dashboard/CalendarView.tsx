@@ -170,10 +170,10 @@ export default function CalendarView({ userId }: CalendarViewProps) {
                             <Building2 className="w-4 h-4" />
                             <span className="font-medium">{company.name}</span>
                             {hasVerifiedData && (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" title="Verified data" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                             )}
                             {!hasVerifiedData && company.internship_open_month && (
-                              <AlertCircle className="w-3.5 h-3.5 text-yellow-400" title="Estimated data" />
+                              <AlertCircle className="w-3.5 h-3.5 text-yellow-400" />
                             )}
                           </div>
                           <span className="text-xs px-2 py-1 rounded bg-slate-800/50">

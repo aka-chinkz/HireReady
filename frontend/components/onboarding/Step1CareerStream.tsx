@@ -23,7 +23,7 @@ export default function Step1CareerStream({ value, onChange, onNext }: Step1Care
       <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
         Choose Your Career Stream
       </h2>
-      <p className="text-slate-400 mb-8">Select the field you're most interested in pursuing</p>
+      <p className="text-slate-400 mb-8">Select the field you&apos;re most interested in pursuing</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {CAREER_STREAMS.map((stream) => {

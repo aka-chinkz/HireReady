@@ -182,7 +182,7 @@ export default function FeedbackModal({ isOpen, onClose, pageSource = 'home' }: 
                     placeholder="your.email@example.com"
                   />
                   <p className="mt-1 text-xs text-slate-500">
-                    We'll only use this to follow up on your feedback if needed
+                    We&apos;ll only use this to follow up on your feedback if needed
                   </p>
                 </div>
 
