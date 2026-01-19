@@ -2,7 +2,7 @@
 Feedback collection endpoints
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from app.models import FeedbackCreate, FeedbackResponse
 from app.database import prisma
 from typing import List
@@ -10,6 +10,19 @@ import re
 from html import escape
 
 router = APIRouter()
+
+# Helper function to check if user is admin
+async def check_admin(user_id: str) -> bool:
+    """Check if a user has admin privileges"""
+    try:
+        user = await prisma.user.find_unique(where={"id": user_id})
+        if not user:
+            return False
+        # Handle case where isAdmin field doesn't exist yet (migration not run)
+        return getattr(user, 'isAdmin', False)
+    except Exception as e:
+        print(f"Error checking admin status: {e}")
+        return False
 
 # Constants for validation
 MIN_MESSAGE_LENGTH = 5
@@ -134,21 +147,24 @@ async def create_feedback(feedback_data: FeedbackCreate):
         )
 
 @router.get("/", response_model=List[FeedbackResponse])
-async def get_feedback_list(limit: int = 100, offset: int = 0):
+async def get_feedback_list(
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+    user_id: str = Query(..., description="User ID to verify admin access")
+):
     """
-    Get list of feedback entries (for admin/internal use).
+    Get list of feedback entries (admin only).
     
-    In production, this should be protected with authentication:
-    from fastapi import Depends
-    from app.auth import get_current_admin_user
-    
-    @router.get("/", response_model=List[FeedbackResponse])
-    async def get_feedback_list(
-        limit: int = 100,
-        offset: int = 0,
-        current_user: User = Depends(get_current_admin_user)
-    ):
+    Requires admin privileges. Pass user_id as query parameter to verify access.
     """
+    # Check if user is admin
+    is_admin = await check_admin(user_id)
+    if not is_admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied. Admin privileges required."
+        )
+    
     try:
         feedback_list = await prisma.feedback.find_many(
             take=limit,
@@ -174,12 +190,23 @@ async def get_feedback_list(limit: int = 100, offset: int = 0):
         )
 
 @router.get("/{feedback_id}", response_model=FeedbackResponse)
-async def get_feedback(feedback_id: str):
+async def get_feedback(
+    feedback_id: str,
+    user_id: str = Query(..., description="User ID to verify admin access")
+):
     """
-    Get a specific feedback entry by ID (for admin/internal use).
+    Get a specific feedback entry by ID (admin only).
     
-    In production, this should be protected with authentication.
+    Requires admin privileges. Pass user_id as query parameter to verify access.
     """
+    # Check if user is admin
+    is_admin = await check_admin(user_id)
+    if not is_admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied. Admin privileges required."
+        )
+    
     try:
         feedback = await prisma.feedback.find_unique(
             where={"id": feedback_id}

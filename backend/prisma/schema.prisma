@@ -34,6 +34,9 @@ model User {
   // Activity tracking
   lastActiveAt    DateTime?   // Last time user was active
   
+  // Admin access
+  isAdmin         Boolean     @default(false) // Admin access for viewing feedback and managing system
+  
   // Relations
   applications    Application[]
   problemProgress UserProblemProgress[]

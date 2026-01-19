@@ -353,6 +353,43 @@ export const feedbackApi = {
       throw new Error(errorMessage)
     }
   },
+
+  getAll: async (userId: string, limit: number = 100, offset: number = 0): Promise<FeedbackResponse[]> => {
+    try {
+      const response = await api.get('/api/feedback/', {
+        params: { user_id: userId, limit, offset }
+      })
+      return response.data
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to fetch feedback'
+      throw new Error(errorMessage)
+    }
+  },
+
+  get: async (feedbackId: string, userId: string): Promise<FeedbackResponse> => {
+    try {
+      const response = await api.get(`/api/feedback/${feedbackId}`, {
+        params: { user_id: userId }
+      })
+      return response.data
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to fetch feedback'
+      throw new Error(errorMessage)
+    }
+  },
+}
+
+// Admin API
+export const adminApi = {
+  checkAdmin: async (userId: string): Promise<{ is_admin: boolean }> => {
+    try {
+      const response = await api.get(`/api/users/${userId}/admin/check`)
+      return response.data
+    } catch (error: any) {
+      console.error('Error checking admin status:', error)
+      return { is_admin: false }
+    }
+  },
 }
 
 // Practice API

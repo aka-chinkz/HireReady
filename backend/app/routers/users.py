@@ -13,6 +13,19 @@ from pydantic import BaseModel
 router = APIRouter()
 intelligence = CareerIntelligence()
 
+# Helper function to check if user is admin
+async def check_admin(user_id: str) -> bool:
+    """Check if a user has admin privileges"""
+    try:
+        user = await prisma.user.find_unique(where={"id": user_id})
+        if not user:
+            return False
+        # Handle case where isAdmin field doesn't exist yet (migration not run)
+        return getattr(user, 'isAdmin', False)
+    except Exception as e:
+        print(f"Error checking admin status: {e}")
+        return False
+
 @router.post("/", response_model=UserResponse)
 async def create_user(user_data: UserCreate):
     """Create a new user and calculate initial readiness score"""
@@ -477,15 +490,14 @@ async def update_user_profile(user_id: str, profile_data: ProfileUpdateRequest):
     except Exception as e:
         import traceback
         error_detail = f"{str(e)}\n{traceback.format_exc()}"
-        print(f"Unexpected error in update_user_profile: {error_detail}")
-        raise HTTPException(status_code=500, detail=f"Failed to update profile: {str(e)}")
-    except HTTPException:
-        raise
-    except Exception as e:
-        import traceback
-        error_detail = f"{str(e)}\n{traceback.format_exc()}"
         print(f"Error in update_user_profile: {error_detail}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{user_id}/admin/check")
+async def check_user_admin(user_id: str):
+    """Check if a user has admin privileges"""
+    is_admin = await check_admin(user_id)
+    return {"is_admin": is_admin}
 
 
 

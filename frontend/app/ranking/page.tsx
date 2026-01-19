@@ -10,7 +10,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Trophy, Users, Medal, ChevronLeft, ChevronRight, UserPlus, UserCheck, Loader2 } from 'lucide-react'
+import { Trophy, Users, Medal, ChevronLeft, ChevronRight, UserPlus, UserCheck, Loader2, Search, X } from 'lucide-react'
 import { rankingApi, friendsApi } from '@/lib/api'
 import ToastContainer, { Toast, ToastType } from '@/components/Toast'
 
@@ -45,6 +45,7 @@ export default function RankingPage() {
   const [friendships, setFriendships] = useState<Set<string>>(new Set())
   const [loadingFriendships, setLoadingFriendships] = useState<Set<string>>(new Set())
   const [toasts, setToasts] = useState<Toast[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const pageSize = 50
 
   useEffect(() => {
@@ -88,10 +89,34 @@ export default function RankingPage() {
     }
   }
 
+  // Filter users based on search query
+  const filteredUsers = useMemo(() => {
+    if (!rankingData) return []
+    if (!searchQuery.trim()) return rankingData.users
+    
+    const query = searchQuery.toLowerCase().trim()
+    return rankingData.users.filter(user => 
+      user.username.toLowerCase().includes(query) ||
+      (user.email && user.email.toLowerCase().includes(query))
+    )
+  }, [rankingData, searchQuery])
+
   const totalPages = useMemo(() => {
     if (!rankingData) return 1
+    // If searching, show pages based on filtered results
+    if (searchQuery.trim()) {
+      return Math.ceil(filteredUsers.length / pageSize)
+    }
     return Math.ceil(rankingData.total_count / pageSize)
-  }, [rankingData])
+  }, [rankingData, searchQuery, filteredUsers])
+
+  // Paginate filtered users
+  const paginatedUsers = useMemo(() => {
+    if (!searchQuery.trim()) return filteredUsers
+    const startIdx = (currentPage - 1) * pageSize
+    const endIdx = startIdx + pageSize
+    return filteredUsers.slice(startIdx, endIdx)
+  }, [filteredUsers, currentPage, searchQuery])
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Medal className="w-6 h-6 text-yellow-400" />
@@ -274,6 +299,7 @@ export default function RankingPage() {
             onClick={() => {
               setActiveTab('global')
               setCurrentPage(1)
+              setSearchQuery('') // Clear search when switching tabs
             }}
             className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all ${
               activeTab === 'global'
@@ -290,6 +316,7 @@ export default function RankingPage() {
             onClick={() => {
               setActiveTab('friends')
               setCurrentPage(1)
+              setSearchQuery('') // Clear search when switching tabs
             }}
             className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all ${
               activeTab === 'friends'
@@ -304,6 +331,43 @@ export default function RankingPage() {
           </button>
         </motion.div>
 
+        {/* Search Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass rounded-2xl p-4 mb-6"
+        >
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search by username or email..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setCurrentPage(1) // Reset to first page when searching
+              }}
+              className="w-full pl-12 pr-10 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  setCurrentPage(1)
+                }}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="mt-2 text-sm text-slate-400">
+              Found {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'} matching "{searchQuery}"
+            </p>
+          )}
+        </motion.div>
+
         {/* Leaderboard Table */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -311,7 +375,7 @@ export default function RankingPage() {
           transition={{ delay: 0.1 }}
           className="glass rounded-2xl overflow-hidden"
         >
-          {rankingData && rankingData.users.length > 0 ? (
+          {rankingData && (searchQuery.trim() ? filteredUsers.length > 0 : rankingData.users.length > 0) ? (
             <>
               {/* Table Header */}
               <div className="bg-slate-800/50 border-b border-slate-700 sticky top-0 z-10">
@@ -332,7 +396,7 @@ export default function RankingPage() {
 
               {/* Table Body */}
               <div className="divide-y divide-slate-700">
-                {rankingData.users.map((user, index) => {
+                {(searchQuery.trim() ? paginatedUsers : rankingData.users).map((user, index) => {
                   const isCurrentUser = user.id === currentUserId
                   return (
                     <motion.div
@@ -429,7 +493,15 @@ export default function RankingPage() {
               {totalPages > 1 && (
                 <div className="bg-slate-800/50 border-t border-slate-700 px-6 py-4 flex items-center justify-between">
                   <div className="text-sm text-slate-400">
-                    Showing {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, rankingData.total_count)} of {rankingData.total_count}
+                    {searchQuery.trim() ? (
+                      <>
+                        Showing {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, filteredUsers.length)} of {filteredUsers.length} results
+                      </>
+                    ) : (
+                      <>
+                        Showing {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, rankingData.total_count)} of {rankingData.total_count}
+                      </>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -457,9 +529,11 @@ export default function RankingPage() {
             <div className="p-12 text-center text-slate-400">
               <Trophy className="w-16 h-16 mx-auto mb-4 text-slate-600" />
               <p className="text-lg">
-                {activeTab === 'friends' 
-                  ? 'No friends rankings available yet'
-                  : 'No rankings available yet'}
+                {searchQuery.trim() 
+                  ? `No users found matching "${searchQuery}"`
+                  : activeTab === 'friends' 
+                    ? 'No friends rankings available yet'
+                    : 'No rankings available yet'}
               </p>
             </div>
           )}
