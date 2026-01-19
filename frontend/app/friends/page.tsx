@@ -96,23 +96,23 @@ export default function FriendsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-3 sm:gap-4 mb-4 md:mb-6">
             <button
               onClick={() => router.back()}
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors"
+              className="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
-              <Users className="w-8 h-8 text-white" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+              <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">
                 <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
                   My Friends
                 </span>
               </h1>
-              <p className="text-slate-300 text-lg">
+              <p className="text-slate-300 text-sm sm:text-base md:text-lg">
                 {totalCount} {totalCount === 1 ? 'friend' : 'friends'}
               </p>
             </div>
@@ -170,17 +170,17 @@ export default function FriendsPage() {
                         handleRemoveFriend(friend.id)
                       }}
                       disabled={removingFriends.has(friend.id)}
-                      className="ml-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="ml-2 sm:ml-4 px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 sm:gap-2"
                     >
                       {removingFriends.has(friend.id) ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Removing...</span>
+                          <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+                          <span className="hidden sm:inline">Removing...</span>
                         </>
                       ) : (
                         <>
-                          <UserX className="w-4 h-4" />
-                          <span>Remove</span>
+                          <UserX className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="hidden sm:inline">Remove</span>
                         </>
                       )}
                     </button>
@@ -190,8 +190,8 @@ export default function FriendsPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="bg-slate-800/50 border-t border-slate-700 px-6 py-4 flex items-center justify-between">
-                  <div className="text-sm text-slate-400">
+                <div className="bg-slate-800/50 border-t border-slate-700 px-4 md:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-xs sm:text-sm text-slate-400 text-center sm:text-left">
                     Showing {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalCount)} of {totalCount}
                   </div>
                   <div className="flex items-center gap-2">
@@ -200,9 +200,9 @@ export default function FriendsPage() {
                       disabled={currentPage === 1}
                       className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
-                    <span className="px-4 py-2 text-white font-semibold">
+                    <span className="px-3 sm:px-4 py-2 text-sm sm:text-base text-white font-semibold">
                       Page {currentPage} of {totalPages}
                     </span>
                     <button
@@ -210,7 +210,7 @@ export default function FriendsPage() {
                       disabled={currentPage === totalPages}
                       className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors rotate-180"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   </div>
                 </div>

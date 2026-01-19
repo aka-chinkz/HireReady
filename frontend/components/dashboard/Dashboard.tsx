@@ -167,14 +167,14 @@ export default function Dashboard({ userId }: DashboardProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mt-16 md:mt-24 mb-24 md:mb-32 text-center py-12 md:py-16"
+          className="mt-8 sm:mt-12 md:mt-16 lg:mt-24 mb-12 sm:mb-16 md:mb-24 lg:mb-32 text-center py-8 sm:py-10 md:py-12 lg:py-16"
         >
-          <h1 className="text-8xl md:text-9xl font-black mb-6 tracking-tight">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black mb-4 sm:mb-6 tracking-tight px-4">
             <span className="bg-gradient-to-r from-violet-400 via-cyan-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent animate-gradient text-glow">
               HireReady
             </span>
           </h1>
-          <p className="text-3xl md:text-4xl text-slate-300 font-semibold">
+          <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-slate-300 font-semibold px-4">
             Built to get you hired.
           </p>
         </motion.div>
@@ -186,12 +186,12 @@ export default function Dashboard({ userId }: DashboardProps) {
           transition={{ delay: 0.2 }}
           className="mb-8"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 md:mb-20">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 md:mb-16 lg:mb-20 px-4">
             <span className="text-white">Why Choose </span>
             <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">HireReady</span>
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             {/* Card 1: Preparation That Matches Real Companies */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -301,10 +301,10 @@ export default function Dashboard({ userId }: DashboardProps) {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1 }}
           onClick={() => setIsFeedbackModalOpen(true)}
-          className="fixed bottom-8 right-8 z-40 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-full shadow-lg hover:from-violet-600 hover:to-cyan-600 transition-all hover:scale-105"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-40 flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-full shadow-lg hover:from-violet-600 hover:to-cyan-600 transition-all hover:scale-105 text-sm sm:text-base"
         >
-          <MessageSquare className="w-5 h-5" />
-          <span className="font-semibold">Feedback</span>
+          <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="font-semibold hidden sm:inline">Feedback</span>
         </motion.button>
 
         {/* Feedback Modal */}

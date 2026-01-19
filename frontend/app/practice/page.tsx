@@ -354,15 +354,15 @@ export default function PracticePage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
-              <Code2 className="w-8 h-8 text-white" />
+          <div className="flex items-center gap-3 sm:gap-4 mb-4 md:mb-6">
+            <div className="w-12 h-12 sm:w-14 md:w-16 sm:h-14 md:h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+              <Code2 className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
             </div>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
                 Practice Problems
               </h1>
-              <p className="text-slate-400 mt-1">
+              <p className="text-slate-400 mt-1 text-sm sm:text-base">
                 Master DSA and Competitive Programming with curated problems
               </p>
             </div>
@@ -389,7 +389,7 @@ export default function PracticePage() {
                   <button
                     key={diff}
                     onClick={() => setSelectedDifficulty(diff as any)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base rounded-lg transition-colors ${
                       selectedDifficulty === diff
                         ? 'bg-violet-500 text-white'
                         : 'bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700'
@@ -401,7 +401,7 @@ export default function PracticePage() {
                 {/* Bookmark Filter */}
                 <button
                   onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)}
-                  className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 ${
                     showBookmarkedOnly
                       ? 'bg-yellow-500 text-white'
                       : 'bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700'
@@ -409,11 +409,13 @@ export default function PracticePage() {
                   title={showBookmarkedOnly ? 'Show all problems' : 'Show bookmarked only'}
                 >
                   {showBookmarkedOnly ? (
-                    <BookmarkCheck className="w-4 h-4" />
+                    <BookmarkCheck className="w-3 h-3 sm:w-4 sm:h-4" />
                   ) : (
-                    <Bookmark className="w-4 h-4" />
+                    <Bookmark className="w-3 h-3 sm:w-4 sm:h-4" />
                   )}
-                  Bookmarks {bookmarkedIds.size > 0 && `(${bookmarkedIds.size})`}
+                  <span className="hidden sm:inline">Bookmarks</span>
+                  <span className="sm:hidden">Bk</span>
+                  {bookmarkedIds.size > 0 && ` (${bookmarkedIds.size})`}
                 </button>
               </div>
             </div>
@@ -545,7 +547,7 @@ export default function PracticePage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {probs.map((problem) => {
                   const isBookmarked = bookmarkedIds.has(problem.id)
                   const isSolved = solvedIds.has(problem.id)

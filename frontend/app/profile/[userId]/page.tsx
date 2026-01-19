@@ -200,60 +200,63 @@ export default function UserProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="mb-6 flex items-center justify-end">
+          <div className="mb-4 md:mb-6 flex items-center justify-end">
             {isOwnProfile && (
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
               >
-                <LogOut className="w-4 h-4" />
-                Logout
+                <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Logout</span>
+                <span className="sm:hidden">Out</span>
               </button>
             )}
           </div>
           
-          <div className="flex items-center gap-6 mb-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6 md:mb-8">
             <div className="relative group">
               {user?.profile_picture && user.profile_picture.trim().length > 0 ? (
                 <img
                   key={`profile-img-${user.id}-${user.profile_picture.substring(0, 10)}`}
                   src={user.profile_picture}
                   alt="Profile"
-                  className="w-24 h-24 rounded-full border-4 border-violet-500/50 object-cover shadow-lg"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-violet-500/50 object-cover shadow-lg"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center border-4 border-violet-500/50 shadow-lg">
-                  <UserIcon className="w-12 h-12 text-white" />
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center border-4 border-violet-500/50 shadow-lg">
+                  <UserIcon className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
                 </div>
               )}
               {isOwnProfile && (
                 <button
                   onClick={() => setIsEditModalOpen(true)}
-                  className="absolute bottom-0 right-0 p-2 bg-violet-500 rounded-full border-4 border-slate-900 hover:bg-violet-600 transition-colors opacity-0 group-hover:opacity-100"
+                  className="absolute bottom-0 right-0 p-1.5 sm:p-2 bg-violet-500 rounded-full border-2 sm:border-4 border-slate-900 hover:bg-violet-600 transition-colors opacity-0 group-hover:opacity-100"
                   title="Edit Profile"
                 >
-                  <Edit className="w-4 h-4 text-white" />
+                  <Edit className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </button>
               )}
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
+            <div className="flex-1 text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-1">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
                   {user.username || (user.email ? user.email.split('@')[0] : `User ${user.id.substring(0, 8)}`)}
                 </h1>
                 {isOwnProfile && (
                   <button
                     onClick={() => setIsEditModalOpen(true)}
-                    className="p-2 rounded-lg hover:bg-slate-700 transition-colors"
+                    className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-700 transition-colors"
                     title="Edit Profile"
                   >
-                    <Edit className="w-4 h-4 text-slate-400 hover:text-violet-400" />
+                    <Edit className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400 hover:text-violet-400" />
                   </button>
                 )}
               </div>
-              <p className="text-slate-400 text-lg">
-                {user.email || 'No email available'}
-              </p>
+              {isOwnProfile && (
+                <p className="text-slate-400 text-sm sm:text-base md:text-lg">
+                  {user.email || 'No email available'}
+                </p>
+              )}
             </div>
           </div>
         </motion.div>

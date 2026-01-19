@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Code2 } from 'lucide-react'
 
 declare global {
   interface Window {
@@ -105,11 +104,8 @@ export default function GoogleLogin({ onSuccess, onError }: GoogleLoginProps) {
         className="w-full max-w-md"
       >
         <div className="glass rounded-2xl p-8 shadow-2xl text-center">
-          {/* Logo and Title */}
+          {/* Title */}
           <div className="mb-8">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center mx-auto mb-6">
-              <Code2 className="w-12 h-12 text-white" />
-            </div>
             <h1 className="text-4xl font-black text-white mb-3">
               <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
                 HireReady

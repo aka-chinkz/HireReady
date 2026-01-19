@@ -246,17 +246,17 @@ export default function ProgressPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/50">
-              <TrendingUp className="w-8 h-8 text-white" />
+          <div className="flex items-center gap-3 sm:gap-4 mb-4 md:mb-6">
+            <div className="w-12 h-12 sm:w-14 md:w-16 sm:h-14 md:h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/50 flex-shrink-0">
+              <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
             </div>
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2">
                 <span className="bg-gradient-to-r from-violet-400 via-violet-300 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg">
                   Progress Tracker
                 </span>
               </h1>
-              <p className="text-slate-300 text-lg mt-1">
+              <p className="text-slate-300 text-sm sm:text-base md:text-lg mt-1">
                 Track your coding progress and consistency
               </p>
             </div>
