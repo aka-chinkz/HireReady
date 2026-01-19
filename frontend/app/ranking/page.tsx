@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Trophy, Users, Medal, ChevronLeft, ChevronRight, UserPlus, UserCheck, Loader2 } from 'lucide-react'
 import { rankingApi, friendsApi } from '@/lib/api'
@@ -35,6 +36,7 @@ interface RankingData {
 }
 
 export default function RankingPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'global' | 'friends'>('global')
   const [rankingData, setRankingData] = useState<RankingData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -350,7 +352,10 @@ export default function RankingPage() {
                       </div>
 
                       {/* User Info */}
-                      <div className="col-span-4 flex items-center gap-3">
+                      <div 
+                        className="col-span-4 flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => router.push(`/profile/${user.id}`)}
+                      >
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center overflow-hidden flex-shrink-0">
                           {user.avatar_url ? (
                             <img src={user.avatar_url} alt={user.username} className="w-full h-full object-cover" />
@@ -391,7 +396,7 @@ export default function RankingPage() {
 
                       {/* Add Friend Button */}
                       {currentUserId && activeTab === 'global' && !isCurrentUser && (
-                        <div className="col-span-1 flex items-center justify-center">
+                        <div className="col-span-1 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
                           {loadingFriendships.has(user.id) ? (
                             <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
                           ) : friendships.has(user.id) ? (

@@ -182,12 +182,18 @@ async def get_global_ranking(
             try:
                 stats = await get_user_stats(user.id)
                 
-                # Get username from email (before @) or use ID
-                # Handle case where email might be None
-                if user.email:
-                    username = user.email.split('@')[0]
-                else:
-                    username = f"user_{user.id[:8]}"
+                # Get username from database field, fallback to email or ID
+                try:
+                    username = user.username
+                except AttributeError:
+                    username = None
+                
+                # Fallback: use email prefix if username not set, or user ID
+                if not username:
+                    if user.email:
+                        username = user.email.split('@')[0]
+                    else:
+                        username = f"user_{user.id[:8]}"
                 
                 users_with_stats.append({
                     'id': user.id,
@@ -313,8 +319,19 @@ async def get_friends_ranking(
         
         # Add current user first
         user_stats = await get_user_stats(user_id)
-        # Get username from email
-        username = user.email.split('@')[0] if user.email else f"user_{user.id[:8]}"
+        # Get username from database field, fallback to email or ID
+        try:
+            username = user.username
+        except AttributeError:
+            username = None
+        
+        # Fallback: use email prefix if username not set, or user ID
+        if not username:
+            if user.email:
+                username = user.email.split('@')[0]
+            else:
+                username = f"user_{user.id[:8]}"
+        
         users_with_stats.append({
             'id': user.id,
             'username': username,
@@ -331,8 +348,18 @@ async def get_friends_ranking(
                     continue
                 
                 friend_stats = await get_user_stats(relation.friendId)
-                # Get username from email
-                friend_username = friend_user.email.split('@')[0] if friend_user.email else f"user_{relation.friendId[:8]}"
+                # Get username from database field, fallback to email or ID
+                try:
+                    friend_username = friend_user.username
+                except AttributeError:
+                    friend_username = None
+                
+                # Fallback: use email prefix if username not set, or user ID
+                if not friend_username:
+                    if friend_user.email:
+                        friend_username = friend_user.email.split('@')[0]
+                    else:
+                        friend_username = f"user_{relation.friendId[:8]}"
                 
                 users_with_stats.append({
                     'id': friend_user.id,

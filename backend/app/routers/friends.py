@@ -289,8 +289,18 @@ async def get_friends_list(
                     print(traceback.format_exc())
                     stats = {'total_solved': 0, 'easy_solved': 0, 'medium_solved': 0, 'hard_solved': 0}
                 
-                # Get username from email
-                username = friend_user.email.split('@')[0] if friend_user.email else f"user_{friend_user.id[:8]}"
+                # Get username from database field, fallback to email or ID
+                try:
+                    username = friend_user.username
+                except AttributeError:
+                    username = None
+                
+                # Fallback: use email prefix if username not set, or user ID
+                if not username:
+                    if friend_user.email:
+                        username = friend_user.email.split('@')[0]
+                    else:
+                        username = f"user_{friend_user.id[:8]}"
                 
                 # Calculate rank (simplified - would need full ranking calculation for accurate rank)
                 # For now, we'll leave rank as None

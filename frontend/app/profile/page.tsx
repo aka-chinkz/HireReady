@@ -24,36 +24,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const userId = localStorage.getItem('userId')
-    console.log('🔍 Profile page useEffect - userId from storage:', userId)
     if (!userId) {
       router.push('/')
       return
     }
 
-    // Force reload user data to ensure we have the latest
-    console.log('🔄 Loading user data for userId:', userId)
-    loadUser(userId)
-    loadProblemStats(userId)
-    loadActivityStatus(userId)
-    loadGlobalRank(userId)
-    // Update activity on mount
-    userStatsApi.updateActivity(userId)
-
-    // Update activity every 2 minutes while user is on the page
-    const activityInterval = setInterval(() => {
-      userStatsApi.updateActivity(userId)
-      loadActivityStatus(userId)
-    }, 120000) // 2 minutes
-
-    // Refresh activity status every 30 seconds
-    const statusInterval = setInterval(() => {
-      loadActivityStatus(userId)
-    }, 30000) // 30 seconds
-
-    return () => {
-      clearInterval(activityInterval)
-      clearInterval(statusInterval)
-    }
+    // Redirect to the dynamic profile route
+    router.push(`/profile/${userId}`)
   }, [router])
 
   // Debug: Log user state changes, especially profile_picture

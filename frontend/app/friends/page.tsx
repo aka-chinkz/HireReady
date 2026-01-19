@@ -137,7 +137,10 @@ export default function FriendsPage() {
                     transition={{ delay: index * 0.05 }}
                     className="p-6 hover:bg-slate-800/30 transition-colors flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div 
+                      className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => router.push(`/profile/${friend.id}`)}
+                    >
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center overflow-hidden flex-shrink-0">
                         {friend.avatar_url ? (
                           <img src={friend.avatar_url} alt={friend.username} className="w-full h-full object-cover" />
@@ -162,7 +165,10 @@ export default function FriendsPage() {
                       </div>
                     </div>
                     <button
-                      onClick={() => handleRemoveFriend(friend.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleRemoveFriend(friend.id)
+                      }}
                       disabled={removingFriends.has(friend.id)}
                       className="ml-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
