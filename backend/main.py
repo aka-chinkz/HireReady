@@ -3,11 +3,13 @@ CareerPath Planner - FastAPI Backend
 Main application entry point
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import os
 from dotenv import load_dotenv
+import traceback
 
 from app.routers import users, companies, applications, calendar, intelligence, internship_postings, feedback, auth, practice, ats, ranking, friends
 from app.database import connect_db, disconnect_db
@@ -27,6 +29,10 @@ async def lifespan(app: FastAPI):
         print("⚠️  App will start but database operations may fail")
         # Don't crash the app - allow it to start even if DB fails
         # Routes will handle database errors gracefully
+    
+    print("✅ CareerPath Planner API is ready!")
+    print("✅ All routes registered successfully")
+    print("✅ Server is ready to accept requests")
     yield
     # Shutdown
     try:
@@ -65,6 +71,25 @@ app.add_middleware(
     max_age=3600,  # Cache preflight requests for 1 hour
 )
 
+# Add middleware to catch and log all request errors
+@app.middleware("http")
+async def catch_exceptions_middleware(request: Request, call_next):
+    """Catch all exceptions in request handling to prevent crashes"""
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as exc:
+        print(f"❌ Exception in request handler: {exc}")
+        print(f"❌ Path: {request.url.path}")
+        print(f"❌ Traceback: {traceback.format_exc()}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "detail": "Internal server error. Please try again later.",
+                "error": str(exc) if os.getenv("DEBUG", "false").lower() == "true" else "An error occurred"
+            }
+        )
+
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
@@ -89,5 +114,20 @@ async def root():
 
 @app.get("/health")
 async def health():
+    """Health check endpoint - doesn't require database"""
     return {"status": "healthy"}
+
+# Global exception handler to prevent crashes
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Catch all unhandled exceptions to prevent app crashes"""
+    print(f"❌ Unhandled exception: {exc}")
+    print(f"❌ Traceback: {traceback.format_exc()}")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Internal server error. Please try again later.",
+            "error": str(exc) if os.getenv("DEBUG", "false").lower() == "true" else "An error occurred"
+        }
+    )
 

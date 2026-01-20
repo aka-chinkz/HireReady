@@ -126,8 +126,13 @@ async def google_login(request: GoogleTokenRequest):
     - User is created if they don't exist
     """
     try:
-        # Ensure database connection is active
-        await ensure_connected()
+        # Ensure database connection is active (non-blocking - won't crash if it fails)
+        db_connected = await ensure_connected()
+        if not db_connected:
+            raise HTTPException(
+                status_code=503,
+                detail="Database connection unavailable. Please try again in a moment."
+            )
         
         # Verify Google token
         google_user_info = verify_google_token(request.credential)
@@ -274,6 +279,14 @@ async def verify_user(user_id: str):
     Used for session validation.
     """
     try:
+        # Ensure database connection
+        db_connected = await ensure_connected()
+        if not db_connected:
+            raise HTTPException(
+                status_code=503,
+                detail="Database connection unavailable. Please try again in a moment."
+            )
+        
         user = await prisma.user.find_unique(
             where={"id": user_id}
         )
@@ -290,4 +303,10 @@ async def verify_user(user_id: str):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        error_msg = str(e).lower()
+        if "connection" in error_msg or "not connected" in error_msg or "connect" in error_msg:
+            raise HTTPException(
+                status_code=503,
+                detail="Database connection error. Please try again in a moment."
+            )
+        raise HTTPException(status_code=500, detail=f"Verification failed: {str(e)}")
