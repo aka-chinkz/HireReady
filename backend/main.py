@@ -19,10 +19,21 @@ async def lifespan(app: FastAPI):
     """Startup and shutdown events"""
     # Startup
     print("🚀 CareerPath Planner API starting...")
-    await connect_db()
+    try:
+        await connect_db()
+        print("✅ Database connected successfully")
+    except Exception as e:
+        print(f"⚠️  Database connection failed: {e}")
+        print("⚠️  App will start but database operations may fail")
+        # Don't crash the app - allow it to start even if DB fails
+        # Routes will handle database errors gracefully
     yield
     # Shutdown
-    await disconnect_db()
+    try:
+        await disconnect_db()
+        print("✅ Database disconnected")
+    except Exception as e:
+        print(f"⚠️  Error disconnecting database: {e}")
     print("👋 CareerPath Planner API shutting down...")
 
 app = FastAPI(

@@ -78,11 +78,30 @@ export default function GoogleLogin({ onSuccess, onError }: GoogleLoginProps) {
       )
 
       if (!backendResponse.ok) {
-        const errorData = await backendResponse.json()
-        throw new Error(errorData.detail || 'Authentication failed')
+        // Try to parse JSON error, but handle non-JSON responses
+        let errorMessage = 'Authentication failed'
+        const contentType = backendResponse.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await backendResponse.json()
+            errorMessage = errorData.detail || errorData.message || `Server error: ${backendResponse.status}`
+          } catch (e) {
+            errorMessage = `Server error: ${backendResponse.status} ${backendResponse.statusText}`
+          }
+        } else {
+          // Backend returned HTML or empty response (likely crashed)
+          errorMessage = `Backend error: ${backendResponse.status} ${backendResponse.statusText}. Please check Railway logs.`
+        }
+        throw new Error(errorMessage)
       }
 
-      const data = await backendResponse.json()
+      // Parse response JSON
+      let data
+      try {
+        data = await backendResponse.json()
+      } catch (e) {
+        throw new Error('Invalid response from server. Backend may be down.')
+      }
       
       // Store user ID in localStorage
       localStorage.setItem('userId', data.user_id)

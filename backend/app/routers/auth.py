@@ -3,7 +3,7 @@ Authentication endpoints for Google OAuth
 """
 
 from fastapi import APIRouter, HTTPException
-from app.database import prisma
+from app.database import prisma, ensure_connected
 from pydantic import BaseModel
 from typing import Optional
 import os
@@ -126,6 +126,9 @@ async def google_login(request: GoogleTokenRequest):
     - User is created if they don't exist
     """
     try:
+        # Ensure database connection is active
+        await ensure_connected()
+        
         # Verify Google token
         google_user_info = verify_google_token(request.credential)
         
@@ -143,6 +146,14 @@ async def google_login(request: GoogleTokenRequest):
             error_msg = str(find_error).lower()
             # Log the actual error for debugging
             print(f"Database find error: {find_error}")
+            
+            # Check for connection errors
+            if "connection" in error_msg or "not connected" in error_msg or "connect" in error_msg:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Database connection error. Please try again in a moment."
+                )
+            
             if "column" in error_msg and "username" in error_msg:
                 # Database column doesn't exist - this shouldn't happen on find_unique
                 # but if it does, try to handle it
@@ -169,6 +180,14 @@ async def google_login(request: GoogleTokenRequest):
                 error_msg = str(create_error).lower()
                 # Log the actual error for debugging
                 print(f"Database create error: {create_error}")
+                
+                # Check for connection errors
+                if "connection" in error_msg or "not connected" in error_msg or "connect" in error_msg:
+                    raise HTTPException(
+                        status_code=503,
+                        detail="Database connection error. Please try again in a moment."
+                    )
+                
                 if "column" in error_msg and "username" in error_msg:
                     # Username column doesn't exist in database
                     # This means the Prisma client has username but DB doesn't
@@ -216,6 +235,14 @@ async def google_login(request: GoogleTokenRequest):
                     )
                 except Exception as update_error:
                     error_msg = str(update_error).lower()
+                    
+                    # Check for connection errors
+                    if "connection" in error_msg or "not connected" in error_msg or "connect" in error_msg:
+                        raise HTTPException(
+                            status_code=503,
+                            detail="Database connection error. Please try again in a moment."
+                        )
+                    
                     if "column" in error_msg and "username" in error_msg:
                         # Username column doesn't exist - just use existing user
                         pass
