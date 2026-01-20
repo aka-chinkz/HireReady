@@ -42,13 +42,16 @@ allowed_origins_str = os.getenv(
 # Split and strip whitespace from origins
 allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
 
+# Add CORS middleware - must be added before routers
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_origin_regex=r"https://.*\.vercel\.app",  # Allow all Vercel URLs
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],  # Explicitly include OPTIONS for preflight
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
 
 # Include routers
