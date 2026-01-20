@@ -75,8 +75,15 @@ app.add_middleware(
 @app.middleware("http")
 async def catch_exceptions_middleware(request: Request, call_next):
     """Catch all exceptions in request handling to prevent crashes"""
+    # Log incoming requests for debugging
+    if request.url.path.startswith("/api/"):
+        print(f"📥 {request.method} {request.url.path}")
+    
     try:
         response = await call_next(request)
+        # Log response status for API requests
+        if request.url.path.startswith("/api/"):
+            print(f"📤 {request.method} {request.url.path} -> {response.status_code}")
         return response
     except HTTPException:
         # Let FastAPI handle HTTPException (it's already a proper HTTP response)
@@ -84,6 +91,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
     except Exception as exc:
         print(f"❌ Exception in request handler: {exc}")
         print(f"❌ Path: {request.url.path}")
+        print(f"❌ Method: {request.method}")
         print(f"❌ Traceback: {traceback.format_exc()}")
         return JSONResponse(
             status_code=500,
@@ -106,6 +114,14 @@ app.include_router(practice.router, prefix="/api/practice", tags=["practice"])
 app.include_router(ats.router, prefix="/api/ats", tags=["ats"])
 app.include_router(ranking.router, prefix="/api/ranking", tags=["ranking"])
 app.include_router(friends.router, prefix="/api/friends", tags=["friends"])
+
+# Log all registered routes for debugging
+print("\n📋 Registered Routes:")
+for route in app.routes:
+    if hasattr(route, 'methods') and hasattr(route, 'path'):
+        methods = ', '.join(route.methods) if route.methods else 'N/A'
+        print(f"  {methods:10} {route.path}")
+print()
 
 @app.get("/")
 async def root():

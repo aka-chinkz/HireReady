@@ -109,6 +109,11 @@ def verify_google_token(token: str) -> dict:
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"Token verification failed: {str(e)}")
 
+@router.get("/google/test")
+async def test_google_endpoint():
+    """Test endpoint to verify route is accessible"""
+    return {"message": "Google auth endpoint is accessible", "path": "/api/auth/google"}
+
 @router.post("/google", response_model=AuthResponse)
 async def google_login(request: GoogleTokenRequest):
     """
