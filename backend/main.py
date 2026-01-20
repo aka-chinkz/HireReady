@@ -3,7 +3,7 @@ CareerPath Planner - FastAPI Backend
 Main application entry point
 """
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
@@ -78,6 +78,9 @@ async def catch_exceptions_middleware(request: Request, call_next):
     try:
         response = await call_next(request)
         return response
+    except HTTPException:
+        # Let FastAPI handle HTTPException (it's already a proper HTTP response)
+        raise
     except Exception as exc:
         print(f"❌ Exception in request handler: {exc}")
         print(f"❌ Path: {request.url.path}")
