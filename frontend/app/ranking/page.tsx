@@ -93,9 +93,9 @@ export default function RankingPage() {
   const filteredUsers = useMemo(() => {
     if (!rankingData) return []
     if (!searchQuery.trim()) return rankingData.users
-    
+
     const query = searchQuery.toLowerCase().trim()
-    return rankingData.users.filter(user => 
+    return rankingData.users.filter(user =>
       user.username.toLowerCase().includes(query) ||
       (user.email && user.email.toLowerCase().includes(query))
     )
@@ -119,10 +119,10 @@ export default function RankingPage() {
   }, [filteredUsers, currentPage, searchQuery])
 
   const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Medal className="w-6 h-6 text-yellow-400" />
-    if (rank === 2) return <Medal className="w-6 h-6 text-slate-300" />
-    if (rank === 3) return <Medal className="w-6 h-6 text-amber-600" />
-    return null
+    if (rank === 1) return <Medal className="w-6 h-6 text-yellow-400" /> // Gold
+    if (rank === 2) return <Medal className="w-6 h-6 text-slate-300" /> // Silver
+    if (rank === 3) return <Medal className="w-6 h-6 text-amber-700" /> // Bronze
+    return null // Rank 4+ shows number instead
   }
 
   const formatDate = (dateString: string | null) => {
@@ -137,11 +137,11 @@ export default function RankingPage() {
 
   const loadFriendshipStatuses = async () => {
     if (!currentUserId || !rankingData) return
-    
+
     const friendIds = rankingData.users
       .filter(user => user.id !== currentUserId)
       .map(user => user.id)
-    
+
     for (const friendId of friendIds) {
       try {
         const status = await friendsApi.getFriendshipStatus(currentUserId, friendId)
@@ -301,11 +301,10 @@ export default function RankingPage() {
               setCurrentPage(1)
               setSearchQuery('') // Clear search when switching tabs
             }}
-            className={`flex-1 py-2 md:py-3 px-3 md:px-6 rounded-xl font-semibold transition-all text-sm md:text-base ${
-              activeTab === 'global'
+            className={`flex-1 py-2 md:py-3 px-3 md:px-6 rounded-xl font-semibold transition-all text-sm md:text-base ${activeTab === 'global'
                 ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-lg'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
+              }`}
           >
             <div className="flex items-center justify-center gap-1.5 md:gap-2">
               <Users className="w-4 h-4 md:w-5 md:h-5" />
@@ -319,11 +318,10 @@ export default function RankingPage() {
               setCurrentPage(1)
               setSearchQuery('') // Clear search when switching tabs
             }}
-            className={`flex-1 py-2 md:py-3 px-3 md:px-6 rounded-xl font-semibold transition-all text-sm md:text-base ${
-              activeTab === 'friends'
+            className={`flex-1 py-2 md:py-3 px-3 md:px-6 rounded-xl font-semibold transition-all text-sm md:text-base ${activeTab === 'friends'
                 ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-lg'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
+              }`}
           >
             <div className="flex items-center justify-center gap-1.5 md:gap-2">
               <Users className="w-4 h-4 md:w-5 md:h-5" />
@@ -406,9 +404,8 @@ export default function RankingPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className={`p-4 hover:bg-slate-800/30 transition-colors ${
-                        isCurrentUser ? 'bg-violet-500/10 border-l-4 border-violet-500' : ''
-                      }`}
+                      className={`p-4 hover:bg-slate-800/30 transition-colors ${isCurrentUser ? 'bg-violet-500/10 border-l-4 border-violet-500' : ''
+                        }`}
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -417,7 +414,7 @@ export default function RankingPage() {
                               <span className="text-base font-bold text-slate-300">#{user.rank}</span>
                             )}
                           </div>
-                          <div 
+                          <div
                             className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() => router.push(`/profile/${user.id}`)}
                           >
@@ -499,9 +496,8 @@ export default function RankingPage() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className={`grid grid-cols-12 gap-4 px-4 lg:px-6 py-4 items-center hover:bg-slate-800/30 transition-colors ${
-                        isCurrentUser ? 'bg-violet-500/10 border-l-4 border-violet-500' : ''
-                      }`}
+                      className={`grid grid-cols-12 gap-4 px-4 lg:px-6 py-4 items-center hover:bg-slate-800/30 transition-colors ${isCurrentUser ? 'bg-violet-500/10 border-l-4 border-violet-500' : ''
+                        }`}
                     >
                       {/* Rank */}
                       <div className="col-span-1 flex items-center justify-center gap-2">
@@ -511,7 +507,7 @@ export default function RankingPage() {
                       </div>
 
                       {/* User Info */}
-                      <div 
+                      <div
                         className="col-span-4 flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => router.push(`/profile/${user.id}`)}
                       >
@@ -624,9 +620,9 @@ export default function RankingPage() {
             <div className="p-12 text-center text-slate-400">
               <Trophy className="w-16 h-16 mx-auto mb-4 text-slate-600" />
               <p className="text-lg">
-                {searchQuery.trim() 
+                {searchQuery.trim()
                   ? `No users found matching "${searchQuery}"`
-                  : activeTab === 'friends' 
+                  : activeTab === 'friends'
                     ? 'No friends rankings available yet'
                     : 'No rankings available yet'}
               </p>
