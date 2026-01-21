@@ -32,6 +32,12 @@ export default function Dashboard({ userId }: DashboardProps) {
     if (typeof window === 'undefined') return
 
     const initializeVanta = () => {
+      // Check if mobile (screen width < 768px) - don't initialize VANTA on mobile
+      const isMobile = window.innerWidth < 768
+      if (isMobile) {
+        return false // Skip VANTA initialization on mobile
+      }
+
       if (!vantaRef.current || !(window as any).VANTA?.NET) return false
 
       // Clean up existing effect
@@ -44,42 +50,22 @@ export default function Dashboard({ userId }: DashboardProps) {
         vantaEffect.current = null
       }
 
-      // Check if mobile (screen width < 768px)
-      const isMobile = window.innerWidth < 768
-
       try {
-        if (isMobile) {
-          // Mobile configuration
-          vantaEffect.current = (window as any).VANTA.NET({
-            el: vantaRef.current,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            scale: 1.00,
-            scaleMobile: 1.00,
-            color: 0x6c3fff,
-            backgroundColor: 0x0f172a,
-            maxDistance: 28.00
-          })
-        } else {
-          // Desktop configuration (original - no changes)
-          vantaEffect.current = (window as any).VANTA.NET({
-            el: vantaRef.current,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            scale: 1.00,
-            scaleMobile: 1.00,
-            color: 0x6c3fff,
-            backgroundColor: 0x0f172a,
-            points: 20.00,
-            maxDistance: 23.00
-          })
-        }
+        // Desktop configuration only
+        vantaEffect.current = (window as any).VANTA.NET({
+          el: vantaRef.current,
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.00,
+          minWidth: 200.00,
+          scale: 1.00,
+          scaleMobile: 1.00,
+          color: 0x6c3fff,
+          backgroundColor: 0x0f172a,
+          points: 20.00,
+          maxDistance: 23.00
+        })
         return true
       } catch (error) {
         console.error('Error initializing Vanta:', error)
@@ -191,8 +177,11 @@ export default function Dashboard({ userId }: DashboardProps) {
         strategy="afterInteractive"
       />
       <div className="min-h-screen relative p-4 md:p-8">
-        {/* Vanta.js Background */}
-        <div ref={vantaRef} className="fixed inset-0 z-0" style={{ width: '100%', height: '100%' }} />
+        {/* Static gradient background for mobile */}
+        <div className="fixed inset-0 z-0 md:hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+        
+        {/* Vanta.js Background - Desktop only */}
+        <div ref={vantaRef} className="hidden md:block fixed inset-0 z-0" style={{ width: '100%', height: '100%' }} />
         
         {/* Dark overlay for text readability */}
         <div className="fixed inset-0 z-[1] bg-slate-900/70" />
