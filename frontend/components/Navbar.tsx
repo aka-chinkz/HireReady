@@ -18,14 +18,17 @@ export default function Navbar() {
       setIsLoggedIn(!!userId)
     }
     
-    // Check on mount and when pathname changes (after login redirect)
+    // Check immediately on mount
     checkLoginStatus()
     
     // Listen for storage changes (when user logs in/out in another tab)
     window.addEventListener('storage', checkLoginStatus)
     
     // Also listen for custom events (when user logs in/out in same tab)
-    const handleLogin = () => checkLoginStatus()
+    const handleLogin = () => {
+      // Small delay to ensure localStorage is updated
+      setTimeout(checkLoginStatus, 100)
+    }
     window.addEventListener('userLoggedIn', handleLogin)
     window.addEventListener('userLoggedOut', handleLogin)
     

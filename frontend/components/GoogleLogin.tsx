@@ -107,6 +107,9 @@ export default function GoogleLogin({ onSuccess, onError }: GoogleLoginProps) {
       localStorage.setItem('userId', data.user_id)
       localStorage.setItem('userEmail', data.email || '')
       
+      // Dispatch custom event to notify Navbar and other components
+      window.dispatchEvent(new Event('userLoggedIn'))
+      
       // Call success callback
       onSuccess(data.user_id, data.email, data.has_completed_onboarding)
     } catch (error: any) {
