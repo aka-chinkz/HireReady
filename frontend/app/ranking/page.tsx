@@ -120,7 +120,7 @@ export default function RankingPage() {
 
   // Custom medal SVG components
   const GoldMedal = () => (
-    <svg fill="#FFD700" height="24px" width="24px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.559 512.559" xmlSpace="preserve" stroke="#FFD700" className="w-6 h-6">
+    <svg fill="#FFD700" height="24px" width="24px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.559 512.559" xmlSpace="preserve" stroke="#FFD700" className="w-6 h-6" aria-hidden="true">
       <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
       <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
       <g id="SVGRepo_iconCarrier">
@@ -139,7 +139,7 @@ export default function RankingPage() {
   )
 
   const SilverMedal = () => (
-    <svg fill="#C0C0C0" height="24px" width="24px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.559 512.559" xmlSpace="preserve" stroke="#C0C0C0" className="w-6 h-6">
+    <svg fill="#C0C0C0" height="24px" width="24px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.559 512.559" xmlSpace="preserve" stroke="#C0C0C0" className="w-6 h-6" aria-hidden="true">
       <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
       <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
       <g id="SVGRepo_iconCarrier">
@@ -158,7 +158,7 @@ export default function RankingPage() {
   )
 
   const BronzeMedal = () => (
-    <svg fill="#CD7F32" height="24px" width="24px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.559 512.559" xmlSpace="preserve" stroke="#CD7F32" className="w-6 h-6">
+    <svg fill="#CD7F32" height="24px" width="24px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.559 512.559" xmlSpace="preserve" stroke="#CD7F32" className="w-6 h-6" aria-hidden="true">
       <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
       <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
       <g id="SVGRepo_iconCarrier">
@@ -176,11 +176,50 @@ export default function RankingPage() {
     </svg>
   )
 
-  const getRankIcon = (rank: number) => {
-    if (rank === 1) return <GoldMedal />
-    if (rank === 2) return <SilverMedal />
-    if (rank === 3) return <BronzeMedal />
-    return null // Rank 4+ shows number instead
+  // Reusable RankBadge component with accessibility
+  const RankBadge = ({ rank, className = '' }: { rank: number; className?: string }) => {
+    // Ensure rank is a valid number and handle edge cases
+    const normalizedRank = typeof rank === 'number' && !isNaN(rank) ? rank : 0
+    
+    // Get rank label for accessibility
+    const getRankLabel = (r: number): string => {
+      if (r === 1) return '1st place - Gold medal'
+      if (r === 2) return '2nd place - Silver medal'
+      if (r === 3) return '3rd place - Bronze medal'
+      return `${r}th rank`
+    }
+
+    if (normalizedRank === 1) {
+      return (
+        <span className={className} aria-label={getRankLabel(normalizedRank)} title={getRankLabel(normalizedRank)}>
+          <GoldMedal />
+        </span>
+      )
+    }
+    if (normalizedRank === 2) {
+      return (
+        <span className={className} aria-label={getRankLabel(normalizedRank)} title={getRankLabel(normalizedRank)}>
+          <SilverMedal />
+        </span>
+      )
+    }
+    if (normalizedRank === 3) {
+      return (
+        <span className={className} aria-label={getRankLabel(normalizedRank)} title={getRankLabel(normalizedRank)}>
+          <BronzeMedal />
+        </span>
+      )
+    }
+    // Rank 4+ shows numeric rank
+    return (
+      <span 
+        className={`text-base font-bold text-slate-300 ${className}`}
+        aria-label={getRankLabel(normalizedRank)}
+        title={getRankLabel(normalizedRank)}
+      >
+        #{normalizedRank}
+      </span>
+    )
   }
 
   const formatDate = (dateString: string | null) => {
@@ -338,9 +377,9 @@ export default function RankingPage() {
                   <p className="text-2xl font-bold text-white">#{rankingData.current_user_rank}</p>
                 </div>
               </div>
-              {rankingData.current_user_rank <= 3 && (
+              {rankingData.current_user_rank && rankingData.current_user_rank <= 3 && (
                 <div className="text-4xl">
-                  {getRankIcon(rankingData.current_user_rank)}
+                  <RankBadge rank={rankingData.current_user_rank} />
                 </div>
               )}
             </div>
@@ -468,9 +507,7 @@ export default function RankingPage() {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className="flex items-center justify-center w-8">
-                            {getRankIcon(user.rank) || (
-                              <span className="text-base font-bold text-slate-300">#{user.rank}</span>
-                            )}
+                            <RankBadge rank={user.rank} />
                           </div>
                           <div
                             className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
@@ -559,9 +596,7 @@ export default function RankingPage() {
                     >
                       {/* Rank */}
                       <div className="col-span-1 flex items-center justify-center gap-2">
-                        {getRankIcon(user.rank) || (
-                          <span className="text-lg font-bold text-slate-300">#{user.rank}</span>
-                        )}
+                        <RankBadge rank={user.rank} className="text-lg" />
                       </div>
 
                       {/* User Info */}
