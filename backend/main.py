@@ -136,6 +136,17 @@ async def health():
     """Health check endpoint - doesn't require database"""
     return {"status": "healthy"}
 
+@app.get("/test-auth-route")
+async def test_auth_route():
+    """Test endpoint to verify auth routes are accessible"""
+    # Check if auth routes are registered
+    auth_routes = [r for r in app.routes if hasattr(r, 'path') and '/api/auth' in r.path]
+    return {
+        "message": "Auth routes check",
+        "auth_routes_found": len(auth_routes),
+        "routes": [{"path": r.path, "methods": list(r.methods) if hasattr(r, 'methods') else []} for r in auth_routes[:10]]
+    }
+
 # Global exception handler to prevent crashes
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
