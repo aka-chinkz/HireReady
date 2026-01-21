@@ -75,15 +75,13 @@ app.add_middleware(
 @app.middleware("http")
 async def catch_exceptions_middleware(request: Request, call_next):
     """Catch all exceptions in request handling to prevent crashes"""
-    # Log incoming requests for debugging
-    if request.url.path.startswith("/api/"):
-        print(f"📥 {request.method} {request.url.path}")
+    # Log ALL incoming requests (including OPTIONS) for debugging
+    print(f"📥 {request.method} {request.url.path} | Origin: {request.headers.get('origin', 'none')}")
     
     try:
         response = await call_next(request)
-        # Log response status for API requests
-        if request.url.path.startswith("/api/"):
-            print(f"📤 {request.method} {request.url.path} -> {response.status_code}")
+        # Log response status for all requests
+        print(f"📤 {request.method} {request.url.path} -> {response.status_code}")
         return response
     except HTTPException:
         # Let FastAPI handle HTTPException (it's already a proper HTTP response)
@@ -146,6 +144,7 @@ async def test_auth_route():
         "auth_routes_found": len(auth_routes),
         "routes": [{"path": r.path, "methods": list(r.methods) if hasattr(r, 'methods') else []} for r in auth_routes[:10]]
     }
+
 
 # Global exception handler to prevent crashes
 @app.exception_handler(Exception)

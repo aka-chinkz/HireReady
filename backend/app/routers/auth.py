@@ -114,7 +114,8 @@ async def test_google_endpoint():
     """Test endpoint to verify route is accessible"""
     return {"message": "Google auth endpoint is accessible", "path": "/api/auth/google"}
 
-@router.post("/google", response_model=AuthResponse)
+@router.post("/google", response_model=AuthResponse, status_code=200)
+@router.post("/google/", response_model=AuthResponse, status_code=200)  # Handle trailing slash
 async def google_login(request: GoogleTokenRequest):
     """
     Authenticate user with Google OAuth token.
