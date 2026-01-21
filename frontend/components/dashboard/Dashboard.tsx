@@ -44,21 +44,42 @@ export default function Dashboard({ userId }: DashboardProps) {
         vantaEffect.current = null
       }
 
+      // Check if mobile (screen width < 768px)
+      const isMobile = window.innerWidth < 768
+
       try {
-        vantaEffect.current = (window as any).VANTA.NET({
-          el: vantaRef.current,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.00,
-          minWidth: 200.00,
-          scale: 1.00,
-          scaleMobile: 1.00,
-          color: 0x6c3fff,
-          backgroundColor: 0x0f172a,
-          points: 20.00,
-          maxDistance: 23.00
-        })
+        if (isMobile) {
+          // Mobile configuration
+          vantaEffect.current = (window as any).VANTA.NET({
+            el: vantaRef.current,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x6c3fff,
+            backgroundColor: 0x0f172a,
+            maxDistance: 28.00
+          })
+        } else {
+          // Desktop configuration (original - no changes)
+          vantaEffect.current = (window as any).VANTA.NET({
+            el: vantaRef.current,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x6c3fff,
+            backgroundColor: 0x0f172a,
+            points: 20.00,
+            maxDistance: 23.00
+          })
+        }
         return true
       } catch (error) {
         console.error('Error initializing Vanta:', error)
@@ -94,8 +115,24 @@ export default function Dashboard({ userId }: DashboardProps) {
       })
     })
 
+    // Handle window resize to reinitialize with correct config
+    const handleResize = () => {
+      // Reinitialize when switching between mobile/desktop
+      if (vantaEffect.current) {
+        try {
+          vantaEffect.current.destroy()
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+        vantaEffect.current = null
+      }
+      tryInit()
+    }
+    window.addEventListener('resize', handleResize)
+
     // Cleanup function
     return () => {
+      window.removeEventListener('resize', handleResize)
       if (rafId !== null) {
         cancelAnimationFrame(rafId)
       }
